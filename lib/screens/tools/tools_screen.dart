@@ -7,17 +7,323 @@ class ToolsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
+    return Scaffold(
       backgroundColor: AppColors.background,
-      body: Center(
-        child: Text(
-          'Tools',
-          style: TextStyle(
-            color: AppColors.textPrimary,
-            fontSize: 22,
-            fontWeight: FontWeight.w800,
+      body: SafeArea(
+        bottom: false,
+        child: CustomScrollView(
+          slivers: [
+            const SliverToBoxAdapter(child: _Header()),
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(20, 24, 20, 120),
+              sliver: SliverList.list(
+                children: const [
+                  _ToolCard(
+                    levelLabel: 'Level 1',
+                    title: 'Emergency Fund',
+                    description: 'Save your first 1,000 for emergencies.',
+                    lessonLine: 'Patience is the key to growth.',
+                    tag: 'Basic',
+                    icon: Icons.account_balance,
+                    locked: false,
+                  ),
+                  SizedBox(height: 28),
+                  _ToolCard(
+                    levelLabel: 'Level 5',
+                    title: '',
+                    description: 'Unlocks at level 11',
+                    lessonLine: '',
+                    tag: '',
+                    icon: Icons.lock,
+                    locked: true,
+                  ),
+                  SizedBox(height: 28),
+                  _ToolCard(
+                    levelLabel: 'Level 10',
+                    title: '',
+                    description: 'Unlocks at level 15',
+                    lessonLine: '',
+                    tag: '',
+                    icon: Icons.lock,
+                    locked: true,
+                  ),
+                  SizedBox(height: 28),
+                  _ToolCard(
+                    levelLabel: 'Level 20',
+                    title: '',
+                    description: 'Unlocks at level 20',
+                    lessonLine: '',
+                    tag: '',
+                    icon: Icons.lock,
+                    locked: true,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _Header extends StatelessWidget {
+  const _Header();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 18, 16, 18),
+      decoration: const BoxDecoration(
+        border: Border(
+          bottom: BorderSide(color: Color(0xFF20232C), width: 1),
+        ),
+      ),
+      child: Row(
+        children: [
+          const Text(
+            'My Financial Tools',
+            style: TextStyle(
+              color: AppColors.primary,
+              fontSize: 22,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+          const Spacer(),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+            decoration: BoxDecoration(
+              color: AppColors.cardSurface,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: AppColors.primary.withValues(alpha: 0.5),
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: const [
+                Icon(Icons.bolt, color: AppColors.primary, size: 14),
+                SizedBox(width: 4),
+                Text(
+                  '1,250 XP today',
+                  style: TextStyle(
+                    color: AppColors.primary,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ToolCard extends StatelessWidget {
+  const _ToolCard({
+    required this.levelLabel,
+    required this.title,
+    required this.description,
+    required this.lessonLine,
+    required this.tag,
+    required this.icon,
+    required this.locked,
+  });
+
+  final String levelLabel;
+  final String title;
+  final String description;
+  final String lessonLine;
+  final String tag;
+  final IconData icon;
+  final bool locked;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Align(
+          alignment: Alignment.centerLeft,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+            decoration: BoxDecoration(
+              color: locked
+                  ? AppColors.cardSurface
+                  : AppColors.primary.withValues(alpha: 0.18),
+              border: Border.all(
+                color: locked
+                    ? AppColors.textMuted.withValues(alpha: 0.4)
+                    : AppColors.primary,
+                width: 1,
+              ),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Text(
+              levelLabel,
+              style: TextStyle(
+                color: locked ? AppColors.textMuted : AppColors.primary,
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
           ),
         ),
+        const SizedBox(height: 10),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 280),
+            child: locked
+                ? _LockedBody(description: description)
+                : _UnlockedBody(
+                    title: title,
+                    description: description,
+                    lessonLine: lessonLine,
+                    tag: tag,
+                    icon: icon,
+                  ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _UnlockedBody extends StatelessWidget {
+  const _UnlockedBody({
+    required this.title,
+    required this.description,
+    required this.lessonLine,
+    required this.tag,
+    required this.icon,
+  });
+
+  final String title;
+  final String description;
+  final String lessonLine;
+  final String tag;
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppColors.cardSurface,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.primary, width: 1.2),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              if (tag.isNotEmpty)
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.background,
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(
+                      color: AppColors.primary.withValues(alpha: 0.6),
+                    ),
+                  ),
+                  child: Text(
+                    tag,
+                    style: const TextStyle(
+                      color: AppColors.primary,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              const Spacer(),
+              Icon(icon, color: AppColors.primary, size: 22),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Text(
+            title,
+            style: const TextStyle(
+              color: AppColors.textPrimary,
+              fontSize: 15,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            description,
+            style: const TextStyle(
+              color: AppColors.textPrimary,
+              fontSize: 12,
+              height: 1.5,
+            ),
+          ),
+          const SizedBox(height: 10),
+          RichText(
+            text: TextSpan(
+              children: [
+                const TextSpan(
+                  text: 'Lesson: ',
+                  style: TextStyle(
+                    color: AppColors.primary,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                TextSpan(
+                  text: lessonLine,
+                  style: const TextStyle(
+                    color: AppColors.textMuted,
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _LockedBody extends StatelessWidget {
+  const _LockedBody({required this.description});
+
+  final String description;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 150,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.cardSurface,
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.lock_outline,
+            color: AppColors.textMuted.withValues(alpha: 0.55),
+            size: 36,
+          ),
+          const SizedBox(height: 10),
+          Text(
+            description,
+            style: TextStyle(
+              color: AppColors.textMuted.withValues(alpha: 0.7),
+              fontSize: 13,
+            ),
+          ),
+        ],
       ),
     );
   }
