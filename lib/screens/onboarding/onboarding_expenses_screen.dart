@@ -3,22 +3,21 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../models/user_profile.dart';
-import '../../../theme/app_colors.dart';
-import '../onboarding_controller.dart';
-import '../widgets/hero_badge.dart';
-import '../widgets/onboarding_scaffold.dart';
+import '../../components/onboarding/hero_badge.dart';
+import '../../components/onboarding/onboarding_scaffold.dart';
+import '../../providers/onboarding_provider.dart';
+import '../../theme/app_colors.dart';
 
-class OnboardingIncomeScreen extends ConsumerStatefulWidget {
-  const OnboardingIncomeScreen({super.key});
+class OnboardingExpensesScreen extends ConsumerStatefulWidget {
+  const OnboardingExpensesScreen({super.key});
 
   @override
-  ConsumerState<OnboardingIncomeScreen> createState() =>
-      _OnboardingIncomeScreenState();
+  ConsumerState<OnboardingExpensesScreen> createState() =>
+      _OnboardingExpensesScreenState();
 }
 
-class _OnboardingIncomeScreenState
-    extends ConsumerState<OnboardingIncomeScreen> {
+class _OnboardingExpensesScreenState
+    extends ConsumerState<OnboardingExpensesScreen> {
   final _controller = TextEditingController();
   bool _saving = false;
 
@@ -28,7 +27,7 @@ class _OnboardingIncomeScreenState
     super.dispose();
   }
 
-  Future<void> _next() async {
+  Future<void> _finish() async {
     final raw = _controller.text.trim();
     final value = double.tryParse(raw);
     if (value == null || value < 0) {
@@ -39,11 +38,11 @@ class _OnboardingIncomeScreenState
     }
     setState(() => _saving = true);
     final notifier = ref.read(onboardingControllerProvider.notifier);
-    notifier.setIncome(value);
+    notifier.setExpenses(value);
     try {
-      await notifier.persistStep(UserProfile(monthlyIncome: value));
+      await notifier.finalize();
       if (!mounted) return;
-      context.go('/onboarding/expenses');
+      context.go('/home');
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -57,15 +56,15 @@ class _OnboardingIncomeScreenState
   @override
   Widget build(BuildContext context) {
     return OnboardingScaffold(
-      stepIndex: 1,
+      stepIndex: 2,
       hero: const HeroBadge(
         child: Icon(
-          Icons.add_moderator_outlined,
+          Icons.trending_down_rounded,
           size: 76,
           color: AppColors.primary,
         ),
       ),
-      fieldLabel: 'كم دخلك',
+      fieldLabel: 'كم مصاريفك',
       field: TextField(
         controller: _controller,
         textAlign: TextAlign.center,
@@ -74,11 +73,11 @@ class _OnboardingIncomeScreenState
         inputFormatters: [
           FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
         ],
-        onSubmitted: (_) => _next(),
-        decoration: const InputDecoration(hintText: 'دخل الشهر الحالي'),
+        onSubmitted: (_) => _finish(),
+        decoration: const InputDecoration(hintText: 'مصاريف الشهر الحالي'),
       ),
-      ctaLabel: _saving ? '...' : 'التالي',
-      onCta: _saving ? null : _next,
+      ctaLabel: _saving ? '...' : 'ابدأ رحلتك',
+      onCta: _saving ? null : _finish,
     );
   }
 }

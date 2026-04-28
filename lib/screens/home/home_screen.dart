@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../data/user_repository.dart';
+import '../../providers/user_providers.dart';
 import '../../theme/app_colors.dart';
 
 class HomeScreen extends ConsumerWidget {

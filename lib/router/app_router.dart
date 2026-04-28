@@ -1,10 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../features/home/home_screen.dart';
-import '../features/onboarding/screens/onboarding_expenses_screen.dart';
-import '../features/onboarding/screens/onboarding_income_screen.dart';
-import '../features/onboarding/screens/onboarding_name_screen.dart';
+import '../screens/home/home_screen.dart';
+import '../screens/onboarding/onboarding_expenses_screen.dart';
+import '../screens/onboarding/onboarding_income_screen.dart';
+import '../screens/onboarding/onboarding_name_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   return GoRouter(

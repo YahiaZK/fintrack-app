@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../models/user_profile.dart';
-import '../onboarding_controller.dart';
-import '../widgets/fintrack_logo.dart';
-import '../widgets/onboarding_scaffold.dart';
+import '../../components/onboarding/fintrack_logo.dart';
+import '../../components/onboarding/onboarding_scaffold.dart';
+import '../../models/user_profile.dart';
+import '../../providers/onboarding_provider.dart';
 
 class OnboardingNameScreen extends ConsumerStatefulWidget {
   const OnboardingNameScreen({super.key});

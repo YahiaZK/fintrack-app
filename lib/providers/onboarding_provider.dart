@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../data/user_repository.dart';
-import '../../models/user_profile.dart';
+import '../models/user_profile.dart';
+import 'user_providers.dart';
 
 class OnboardingController extends Notifier<UserProfile> {
   @override
@@ -20,11 +20,11 @@ class OnboardingController extends Notifier<UserProfile> {
   }
 
   Future<void> persistStep(UserProfile partial) {
-    return ref.read(userRepositoryProvider).save(partial);
+    return ref.read(userServiceProvider).save(partial);
   }
 
   Future<void> finalize() {
-    return ref.read(userRepositoryProvider).save(state);
+    return ref.read(userServiceProvider).save(state);
   }
 }
 

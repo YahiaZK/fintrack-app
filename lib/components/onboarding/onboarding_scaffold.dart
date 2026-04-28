@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../theme/app_colors.dart';
+import '../../theme/app_colors.dart';
 import 'page_indicator.dart';
 
 class OnboardingScaffold extends StatelessWidget {
