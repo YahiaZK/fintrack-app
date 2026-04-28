@@ -92,10 +92,7 @@ class HomeScreen extends ConsumerWidget {
                         ],
                       ),
                       const SizedBox(height: 24),
-                      const _SectionHeader(
-                        title: 'Goals',
-                        action: 'View all',
-                      ),
+                      const _SectionHeader(title: 'Goals', action: 'View all'),
                       const SizedBox(height: 12),
                       Row(
                         children: const [
@@ -168,9 +165,7 @@ class _Header extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 18),
       decoration: const BoxDecoration(
-        border: Border(
-          bottom: BorderSide(color: Color(0xFF20232C), width: 1),
-        ),
+        border: Border(bottom: BorderSide(color: Color(0xFF20232C), width: 1)),
       ),
       child: const Center(
         child: Text(
@@ -204,21 +199,7 @@ class _ProfileCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Container(
-                width: 52,
-                height: 52,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: AppColors.background,
-                  border: Border.all(color: AppColors.primary, width: 1.5),
-                ),
-                alignment: Alignment.center,
-                child: const Icon(
-                  Icons.person,
-                  color: AppColors.textMuted,
-                  size: 28,
-                ),
-              ),
+              _LevelHex(level: 3),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
@@ -235,16 +216,27 @@ class _ProfileCard extends StatelessWidget {
                     const SizedBox(height: 4),
                     const Text(
                       'Financial Warrior Level',
-                      style: TextStyle(
-                        color: AppColors.primary,
-                        fontSize: 12,
-                      ),
+                      style: TextStyle(color: AppColors.primary, fontSize: 12),
                     ),
                   ],
                 ),
               ),
               const SizedBox(width: 10),
-              const _LevelHex(level: 3),
+              Container(
+                width: 52,
+                height: 52,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: AppColors.background,
+                  border: Border.all(color: AppColors.primary, width: 1.5),
+                ),
+                alignment: Alignment.center,
+                child: const Icon(
+                  Icons.person,
+                  color: AppColors.textMuted,
+                  size: 28,
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 14),
@@ -254,16 +246,10 @@ class _ProfileCard extends StatelessWidget {
             ),
             child: Stack(
               children: [
-                Container(
-                  height: 4,
-                  color: AppColors.background,
-                ),
+                Container(height: 4, color: AppColors.background),
                 FractionallySizedBox(
                   widthFactor: 0.55,
-                  child: Container(
-                    height: 4,
-                    color: AppColors.primary,
-                  ),
+                  child: Container(height: 4, color: AppColors.primary),
                 ),
               ],
             ),
@@ -335,7 +321,25 @@ class _BalanceCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Remaining Budget',
+                style: TextStyle(color: AppColors.textMuted, fontSize: 13),
+              ),
+              Text(
+                '\$${_format(amount)}',
+                style: const TextStyle(
+                  color: AppColors.textPrimary,
+                  fontSize: 20,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ],
+          ),
           Container(
             width: 40,
             height: 40,
@@ -349,28 +353,6 @@ class _BalanceCard extends StatelessWidget {
               color: AppColors.primary,
               size: 22,
             ),
-          ),
-          const SizedBox(width: 12),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Remaining Budget',
-                style: TextStyle(
-                  color: AppColors.textMuted,
-                  fontSize: 13,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                '\$${_format(amount)}',
-                style: const TextStyle(
-                  color: AppColors.textPrimary,
-                  fontSize: 20,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-            ],
           ),
         ],
       ),
@@ -404,10 +386,7 @@ class _MiniStatCard extends StatelessWidget {
         children: [
           Text(
             label,
-            style: const TextStyle(
-              color: AppColors.textMuted,
-              fontSize: 13,
-            ),
+            style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
           ),
           const SizedBox(height: 4),
           Text(
@@ -463,11 +442,7 @@ class _SectionHeader extends StatelessWidget {
 }
 
 class _QuestCard extends StatelessWidget {
-  const _QuestCard({
-    required this.title,
-    required this.icon,
-    required this.xp,
-  });
+  const _QuestCard({required this.title, required this.icon, required this.xp});
 
   final String title;
   final IconData icon;

@@ -99,9 +99,7 @@ class _Header extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 18, 16, 18),
       decoration: const BoxDecoration(
-        border: Border(
-          bottom: BorderSide(color: Color(0xFF20232C), width: 1),
-        ),
+        border: Border(bottom: BorderSide(color: Color(0xFF20232C), width: 1)),
       ),
       child: Row(
         children: [
@@ -183,10 +181,7 @@ class _SectionHeader extends StatelessWidget {
             const SizedBox(height: 2),
             Text(
               subtitle,
-              style: const TextStyle(
-                color: AppColors.textMuted,
-                fontSize: 12,
-              ),
+              style: const TextStyle(color: AppColors.textMuted, fontSize: 12),
             ),
           ],
         ),
@@ -232,9 +227,7 @@ class _ProgressQuestCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final mutedTitle = completed
-        ? AppColors.textMuted
-        : AppColors.textPrimary;
+    final mutedTitle = completed ? AppColors.textMuted : AppColors.textPrimary;
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -247,40 +240,6 @@ class _ProgressQuestCard extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (completed)
-                Container(
-                  width: 36,
-                  height: 36,
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.18),
-                    shape: BoxShape.circle,
-                    border: Border.all(color: AppColors.primary, width: 1.5),
-                  ),
-                  alignment: Alignment.center,
-                  child: const Icon(
-                    Icons.check,
-                    color: AppColors.primary,
-                    size: 18,
-                  ),
-                )
-              else if (xp != null)
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: AppColors.background,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    '+${_formatXp(xp!)} XP',
-                    style: TextStyle(
-                      color: progressColor,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                ),
-              const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -311,6 +270,42 @@ class _ProgressQuestCard extends StatelessWidget {
                   ],
                 ),
               ),
+
+              if (completed)
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withValues(alpha: 0.18),
+                    shape: BoxShape.circle,
+                    border: Border.all(color: AppColors.primary, width: 1.5),
+                  ),
+                  alignment: Alignment.center,
+                  child: const Icon(
+                    Icons.check,
+                    color: AppColors.primary,
+                    size: 18,
+                  ),
+                )
+              else if (xp != null)
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.background,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    '+${_formatXp(xp!)} XP',
+                    style: TextStyle(
+                      color: progressColor,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
             ],
           ),
           const SizedBox(height: 14),
@@ -434,7 +429,7 @@ class _HabitCard extends StatelessWidget {
 
 String _formatXp(int n) {
   return n.toString().replaceAllMapped(
-        RegExp(r'(\d)(?=(\d{3})+(?!\d))'),
-        (m) => '${m[1]},',
-      );
+    RegExp(r'(\d)(?=(\d{3})+(?!\d))'),
+    (m) => '${m[1]},',
+  );
 }
