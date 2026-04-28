@@ -1,13 +1,21 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../components/shell/app_shell.dart';
+import '../screens/calculator/calculator_screen.dart';
 import '../screens/home/home_screen.dart';
 import '../screens/onboarding/onboarding_expenses_screen.dart';
 import '../screens/onboarding/onboarding_income_screen.dart';
 import '../screens/onboarding/onboarding_name_screen.dart';
+import '../screens/tasks/tasks_screen.dart';
+import '../screens/tools/tools_screen.dart';
+
+final _rootKey = GlobalKey<NavigatorState>();
 
 final routerProvider = Provider<GoRouter>((ref) {
   return GoRouter(
+    navigatorKey: _rootKey,
     initialLocation: '/onboarding/name',
     routes: [
       GoRoute(
@@ -22,9 +30,43 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/onboarding/expenses',
         builder: (context, state) => const OnboardingExpensesScreen(),
       ),
-      GoRoute(
-        path: '/home',
-        builder: (context, state) => const HomeScreen(),
+      StatefulShellRoute.indexedStack(
+        builder: (context, state, navigationShell) =>
+            AppShell(navigationShell: navigationShell),
+        branches: [
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/home',
+                builder: (context, state) => const HomeScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/tasks',
+                builder: (context, state) => const TasksScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/tools',
+                builder: (context, state) => const ToolsScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/calculator',
+                builder: (context, state) => const CalculatorScreen(),
+              ),
+            ],
+          ),
+        ],
       ),
     ],
   );
