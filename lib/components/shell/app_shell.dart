@@ -10,22 +10,22 @@ class AppShell extends StatelessWidget {
 
   static const _items = <_NavItem>[
     _NavItem(
-      label: 'الرئيسية',
+      label: 'Home',
       icon: Icons.shield_outlined,
       activeIcon: Icons.shield,
     ),
     _NavItem(
-      label: 'المهام',
+      label: 'Tasks',
       icon: Icons.assignment_outlined,
       activeIcon: Icons.assignment,
     ),
     _NavItem(
-      label: 'الأدوات',
+      label: 'Tools',
       icon: Icons.grid_view_outlined,
       activeIcon: Icons.grid_view_rounded,
     ),
     _NavItem(
-      label: 'الحاسبة',
+      label: 'Calculator',
       icon: Icons.calculate_outlined,
       activeIcon: Icons.calculate,
     ),

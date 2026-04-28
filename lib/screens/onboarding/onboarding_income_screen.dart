@@ -33,7 +33,7 @@ class _OnboardingIncomeScreenState
     final value = double.tryParse(raw);
     if (value == null || value < 0) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('يرجى إدخال رقم صحيح')),
+        const SnackBar(content: Text('Please enter a valid number')),
       );
       return;
     }
@@ -47,7 +47,7 @@ class _OnboardingIncomeScreenState
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('تعذر الحفظ: $e')),
+        SnackBar(content: Text('Failed to save: $e')),
       );
     } finally {
       if (mounted) setState(() => _saving = false);
@@ -65,7 +65,7 @@ class _OnboardingIncomeScreenState
           color: AppColors.primary,
         ),
       ),
-      fieldLabel: 'كم دخلك',
+      fieldLabel: 'What is your income?',
       field: TextField(
         controller: _controller,
         textAlign: TextAlign.center,
@@ -75,9 +75,9 @@ class _OnboardingIncomeScreenState
           FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
         ],
         onSubmitted: (_) => _next(),
-        decoration: const InputDecoration(hintText: 'دخل الشهر الحالي'),
+        decoration: const InputDecoration(hintText: 'Current month income'),
       ),
-      ctaLabel: _saving ? '...' : 'التالي',
+      ctaLabel: _saving ? '...' : 'Next',
       onCta: _saving ? null : _next,
     );
   }

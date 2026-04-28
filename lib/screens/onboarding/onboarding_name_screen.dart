@@ -30,7 +30,7 @@ class _OnboardingNameScreenState extends ConsumerState<OnboardingNameScreen> {
     if (name.isEmpty) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text('يرجى إدخال اسمك')));
+      ).showSnackBar(const SnackBar(content: Text('Please enter your name')));
       return;
     }
     setState(() => _saving = true);
@@ -44,7 +44,7 @@ class _OnboardingNameScreenState extends ConsumerState<OnboardingNameScreen> {
       if (!mounted) return;
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('تعذر الحفظ: $e')));
+      ).showSnackBar(SnackBar(content: Text('Failed to save: $e')));
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -55,15 +55,17 @@ class _OnboardingNameScreenState extends ConsumerState<OnboardingNameScreen> {
     return OnboardingScaffold(
       stepIndex: 0,
       hero: const FintrackLogo(),
-      fieldLabel: 'ما اسمك؟',
+      fieldLabel: 'What is your name?',
       field: TextField(
         controller: _controller,
         textAlign: TextAlign.center,
         textInputAction: TextInputAction.done,
         onSubmitted: (_) => _next(),
-        decoration: const InputDecoration(hintText: 'أدخل اسم المحارب...'),
+        decoration: const InputDecoration(
+          hintText: 'Enter your warrior name...',
+        ),
       ),
-      ctaLabel: _saving ? '...' : 'التالي',
+      ctaLabel: _saving ? '...' : 'Next',
       onCta: _saving ? null : _next,
     );
   }

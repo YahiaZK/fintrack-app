@@ -21,14 +21,14 @@ class HomeScreen extends ConsumerWidget {
           child: Padding(
             padding: const EdgeInsets.all(24),
             child: Text(
-              'حدث خطأ: $e',
+              'Something went wrong: $e',
               style: const TextStyle(color: AppColors.danger),
               textAlign: TextAlign.center,
             ),
           ),
         ),
         data: (profile) {
-          final name = profile?.name ?? 'محارب جديد';
+          final name = profile?.name ?? 'New Warrior';
           final income = profile?.monthlyIncome ?? 0;
           final expenses = profile?.monthlyExpenses ?? 0;
           final balance = income - expenses;
@@ -49,34 +49,34 @@ class HomeScreen extends ConsumerWidget {
                         children: [
                           Expanded(
                             child: _MiniStatCard(
-                              label: 'المُنفق',
-                              amount: expenses,
-                              icon: Icons.trending_down_rounded,
-                              accent: AppColors.danger,
+                              label: 'Saved',
+                              amount: balance > 0 ? balance : 0,
+                              icon: Icons.savings_outlined,
+                              accent: AppColors.primary,
                             ),
                           ),
                           const SizedBox(width: 12),
                           Expanded(
                             child: _MiniStatCard(
-                              label: 'المُدخر',
-                              amount: balance > 0 ? balance : 0,
-                              icon: Icons.savings_outlined,
-                              accent: AppColors.primary,
+                              label: 'Spent',
+                              amount: expenses,
+                              icon: Icons.trending_down_rounded,
+                              accent: AppColors.danger,
                             ),
                           ),
                         ],
                       ),
                       const SizedBox(height: 24),
                       const _SectionHeader(
-                        title: 'مهام اليوم',
-                        action: 'عرض الكل',
+                        title: "Today's Quests",
+                        action: 'View all',
                       ),
                       const SizedBox(height: 12),
                       Row(
                         children: const [
                           Expanded(
                             child: _QuestCard(
-                              title: 'تحدي الوجبات المنزلية',
+                              title: 'Home meals challenge',
                               icon: Icons.restaurant,
                               xp: 50,
                             ),
@@ -84,7 +84,7 @@ class HomeScreen extends ConsumerWidget {
                           SizedBox(width: 12),
                           Expanded(
                             child: _QuestCard(
-                              title: 'توفير الوقود الأسبوعي',
+                              title: 'Weekly fuel saving',
                               icon: Icons.directions_car_filled,
                               xp: 120,
                             ),
@@ -93,15 +93,15 @@ class HomeScreen extends ConsumerWidget {
                       ),
                       const SizedBox(height: 24),
                       const _SectionHeader(
-                        title: 'الأهداف',
-                        action: 'عرض الكل',
+                        title: 'Goals',
+                        action: 'View all',
                       ),
                       const SizedBox(height: 12),
                       Row(
                         children: const [
                           Expanded(
                             child: _GoalCard(
-                              title: 'دفعة المنزل الجديد',
+                              title: 'New home down payment',
                               icon: Icons.home_outlined,
                               progress: 0.65,
                             ),
@@ -109,7 +109,7 @@ class HomeScreen extends ConsumerWidget {
                           SizedBox(width: 12),
                           Expanded(
                             child: _GoalCard(
-                              title: 'رحلة اليابان القادمة',
+                              title: 'Upcoming Japan trip',
                               icon: Icons.flight,
                               progress: 0.4,
                             ),
@@ -117,31 +117,31 @@ class HomeScreen extends ConsumerWidget {
                         ],
                       ),
                       const SizedBox(height: 24),
-                      const _SectionHeader(title: 'آخر المعاملات'),
+                      const _SectionHeader(title: 'Recent Transactions'),
                       const SizedBox(height: 12),
                       const _TransactionTile(
-                        title: 'ستاربوكس',
-                        subtitle: 'منذ ساعتين',
+                        title: 'Starbucks',
+                        subtitle: '2 hours ago',
                         amount: -28.5,
-                        tag: 'ترفيه',
+                        tag: 'Leisure',
                         icon: Icons.local_cafe,
                         iconBg: Color(0xFF3A2A22),
                         iconColor: Color(0xFFC58A6E),
                       ),
                       const SizedBox(height: 10),
                       const _TransactionTile(
-                        title: 'تحويل وارد',
-                        subtitle: 'أمس',
+                        title: 'Incoming transfer',
+                        subtitle: 'Yesterday',
                         amount: 1500,
-                        tag: 'راتب',
+                        tag: 'Salary',
                         icon: Icons.account_balance_wallet,
                         iconBg: Color(0xFF1F2D2A),
                         iconColor: AppColors.primary,
                       ),
                       const SizedBox(height: 10),
                       const _TransactionTile(
-                        title: 'محطة أدنوك',
-                        subtitle: 'أمس',
+                        title: 'ADNOC Station',
+                        subtitle: 'Yesterday',
                         amount: -120.0,
                         tag: '',
                         icon: Icons.local_gas_station,
@@ -222,7 +222,7 @@ class _ProfileCard extends StatelessWidget {
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       name,
@@ -234,7 +234,7 @@ class _ProfileCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     const Text(
-                      'مستوى المحارب المالي',
+                      'Financial Warrior Level',
                       style: TextStyle(
                         color: AppColors.primary,
                         fontSize: 12,
@@ -350,12 +350,12 @@ class _BalanceCard extends StatelessWidget {
               size: 22,
             ),
           ),
-          const Spacer(),
+          const SizedBox(width: 12),
           Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
-                'الميزانية المتبقية',
+                'Remaining Budget',
                 style: TextStyle(
                   color: AppColors.textMuted,
                   fontSize: 13,
@@ -363,7 +363,7 @@ class _BalanceCard extends StatelessWidget {
               ),
               const SizedBox(height: 4),
               Text(
-                '${_format(amount)} \$',
+                '\$${_format(amount)}',
                 style: const TextStyle(
                   color: AppColors.textPrimary,
                   fontSize: 20,
@@ -400,33 +400,27 @@ class _MiniStatCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Align(
-            alignment: AlignmentDirectional.centerEnd,
-            child: Text(
-              label,
-              style: const TextStyle(
-                color: AppColors.textMuted,
-                fontSize: 13,
-              ),
+          Text(
+            label,
+            style: const TextStyle(
+              color: AppColors.textMuted,
+              fontSize: 13,
             ),
           ),
           const SizedBox(height: 4),
-          Align(
-            alignment: AlignmentDirectional.centerEnd,
-            child: Text(
-              '${_format(amount)} \$',
-              style: const TextStyle(
-                color: AppColors.textPrimary,
-                fontSize: 18,
-                fontWeight: FontWeight.w800,
-              ),
+          Text(
+            '\$${_format(amount)}',
+            style: const TextStyle(
+              color: AppColors.textPrimary,
+              fontSize: 18,
+              fontWeight: FontWeight.w800,
             ),
           ),
           const SizedBox(height: 14),
           Align(
-            alignment: AlignmentDirectional.centerStart,
+            alignment: Alignment.centerRight,
             child: Icon(icon, color: accent, size: 22),
           ),
         ],
@@ -445,6 +439,15 @@ class _SectionHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
+        Text(
+          title,
+          style: const TextStyle(
+            color: AppColors.textPrimary,
+            fontSize: 17,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+        const Spacer(),
         if (action != null)
           Text(
             action!,
@@ -454,15 +457,6 @@ class _SectionHeader extends StatelessWidget {
               fontWeight: FontWeight.w600,
             ),
           ),
-        const Spacer(),
-        Text(
-          title,
-          style: const TextStyle(
-            color: AppColors.textPrimary,
-            fontSize: 17,
-            fontWeight: FontWeight.w800,
-          ),
-        ),
       ],
     );
   }
@@ -488,16 +482,12 @@ class _QuestCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Align(
-            alignment: AlignmentDirectional.centerEnd,
-            child: Icon(icon, color: AppColors.level, size: 20),
-          ),
+          Icon(icon, color: AppColors.level, size: 20),
           const SizedBox(height: 14),
           Text(
             title,
-            textAlign: TextAlign.right,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(
@@ -549,16 +539,12 @@ class _GoalCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Align(
-            alignment: AlignmentDirectional.centerEnd,
-            child: Icon(icon, color: AppColors.primary, size: 20),
-          ),
+          Icon(icon, color: AppColors.primary, size: 20),
           const SizedBox(height: 14),
           Text(
             title,
-            textAlign: TextAlign.right,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(
@@ -612,9 +598,6 @@ class _TransactionTile extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.cardSurface,
         borderRadius: BorderRadius.circular(14),
-        border: const BorderDirectional(
-          start: BorderSide(width: 0),
-        ),
       ),
       child: Row(
         children: [
@@ -627,8 +610,43 @@ class _TransactionTile extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 10),
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: iconBg,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            alignment: Alignment.center,
+            child: Icon(icon, color: iconColor, size: 20),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  subtitle,
+                  style: const TextStyle(
+                    color: AppColors.textMuted,
+                    fontSize: 11,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 10),
           Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
                 '${positive ? '+' : ''}${_format(amount)}',
@@ -649,39 +667,6 @@ class _TransactionTile extends StatelessWidget {
                 ),
               ],
             ],
-          ),
-          const Spacer(),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                title,
-                style: const TextStyle(
-                  color: AppColors.textPrimary,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                subtitle,
-                style: const TextStyle(
-                  color: AppColors.textMuted,
-                  fontSize: 11,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(width: 10),
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: iconBg,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            alignment: Alignment.center,
-            child: Icon(icon, color: iconColor, size: 20),
           ),
         ],
       ),

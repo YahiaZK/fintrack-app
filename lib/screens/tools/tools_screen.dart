@@ -11,7 +11,7 @@ class ToolsScreen extends StatelessWidget {
       backgroundColor: AppColors.background,
       body: Center(
         child: Text(
-          'الأدوات',
+          'Tools',
           style: TextStyle(
             color: AppColors.textPrimary,
             fontSize: 22,

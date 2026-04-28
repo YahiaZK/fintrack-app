@@ -12,8 +12,8 @@ class OnboardingScaffold extends StatelessWidget {
     required this.field,
     required this.ctaLabel,
     required this.onCta,
-    this.title = 'مرحباً بك في FinTrack',
-    this.subtitle = 'تتبع مصاريفك، اكسب خبرة وارتق في المستوى.',
+    this.title = 'Welcome to FinTrack',
+    this.subtitle = 'Track your spending, earn XP, and level up.',
   });
 
   final int stepIndex;

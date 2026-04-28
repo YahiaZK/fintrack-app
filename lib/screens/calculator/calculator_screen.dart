@@ -11,7 +11,7 @@ class CalculatorScreen extends StatelessWidget {
       backgroundColor: AppColors.background,
       body: Center(
         child: Text(
-          'الحاسبة',
+          'Calculator',
           style: TextStyle(
             color: AppColors.textPrimary,
             fontSize: 22,

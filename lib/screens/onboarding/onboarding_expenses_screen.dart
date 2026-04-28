@@ -32,7 +32,7 @@ class _OnboardingExpensesScreenState
     final value = double.tryParse(raw);
     if (value == null || value < 0) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('يرجى إدخال رقم صحيح')),
+        const SnackBar(content: Text('Please enter a valid number')),
       );
       return;
     }
@@ -46,7 +46,7 @@ class _OnboardingExpensesScreenState
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('تعذر الحفظ: $e')),
+        SnackBar(content: Text('Failed to save: $e')),
       );
     } finally {
       if (mounted) setState(() => _saving = false);
@@ -64,7 +64,7 @@ class _OnboardingExpensesScreenState
           color: AppColors.primary,
         ),
       ),
-      fieldLabel: 'كم مصاريفك',
+      fieldLabel: 'What are your expenses?',
       field: TextField(
         controller: _controller,
         textAlign: TextAlign.center,
@@ -74,9 +74,9 @@ class _OnboardingExpensesScreenState
           FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
         ],
         onSubmitted: (_) => _finish(),
-        decoration: const InputDecoration(hintText: 'مصاريف الشهر الحالي'),
+        decoration: const InputDecoration(hintText: 'Current month expenses'),
       ),
-      ctaLabel: _saving ? '...' : 'ابدأ رحلتك',
+      ctaLabel: _saving ? '...' : 'Start your journey',
       onCta: _saving ? null : _finish,
     );
   }

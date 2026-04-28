@@ -19,14 +19,14 @@ class TasksScreen extends StatelessWidget {
               sliver: SliverList.list(
                 children: [
                   const _SectionHeader(
-                    title: 'المهام اليومية',
-                    subtitle: 'تتجدد المهام خلال 04:20:15',
+                    title: 'Daily Quests',
+                    subtitle: 'Renews in 04:20:15',
                     accent: AppColors.warning,
                   ),
                   const SizedBox(height: 12),
                   _ProgressQuestCard(
-                    title: 'مقتصد القهوة',
-                    description: 'تجنب شراء قهوة خارجية اليوم',
+                    title: 'Coffee Saver',
+                    description: 'Avoid buying coffee outside today',
                     xp: 200,
                     progress: 0.05,
                     progressLabel: '0/1',
@@ -34,8 +34,8 @@ class TasksScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                   _ProgressQuestCard(
-                    title: 'مدون النفقات',
-                    description: 'سجل 3 عمليات شرائية اليوم',
+                    title: 'Expense Logger',
+                    description: 'Log 3 purchases today',
                     completed: true,
                     progress: 1,
                     progressLabel: '3/3',
@@ -43,14 +43,14 @@ class TasksScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 28),
                   const _SectionHeader(
-                    title: 'المهام الأسبوعية',
-                    subtitle: 'الموعد النهائي: يوم الأحد',
+                    title: 'Weekly Quests',
+                    subtitle: 'Deadline: Sunday',
                     accent: AppColors.textPrimary,
                   ),
                   const SizedBox(height: 12),
                   _ProgressQuestCard(
-                    title: 'المستثمر المنضبط',
-                    description: 'إيداع 500 ريال في المحفظة الاستثمارية',
+                    title: 'Disciplined Investor',
+                    description: 'Deposit 500 in your investment wallet',
                     xp: 1500,
                     progress: 0.5,
                     progressLabel: '250/500',
@@ -58,26 +58,26 @@ class TasksScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 28),
                   const _SectionHeader(
-                    title: 'مهام العادات',
-                    subtitle: 'حطم العادات السيئة لتكسب القوة',
+                    title: 'Habit Quests',
+                    subtitle: 'Break bad habits to gain power',
                     accent: AppColors.danger,
                   ),
                   const SizedBox(height: 12),
                   const _HabitCard(
-                    title: 'قاتل القهوة (Coffee Killer)',
-                    subtitle: 'سلسلة: 5 أيام •••',
+                    title: 'Coffee Killer',
+                    subtitle: 'Streak: 5 days •••',
                     icon: Icons.local_cafe,
                     iconColor: AppColors.danger,
-                    statusLabel: 'تم اليوم',
+                    statusLabel: 'Done today',
                     statusColor: AppColors.danger,
                   ),
                   const SizedBox(height: 12),
                   const _HabitCard(
-                    title: 'تحدي الوجبات السريعة',
-                    subtitle: 'لا وجبات سريعة لمدة أسبوع',
+                    title: 'Fast food challenge',
+                    subtitle: 'No fast food for a week',
                     icon: Icons.fastfood,
                     iconColor: AppColors.danger,
-                    statusLabel: 'فشل',
+                    statusLabel: 'Failed',
                     statusColor: AppColors.danger,
                     statusOutlined: true,
                   ),
@@ -105,6 +105,15 @@ class _Header extends StatelessWidget {
       ),
       child: Row(
         children: [
+          const Text(
+            'Quest Board',
+            style: TextStyle(
+              color: AppColors.primary,
+              fontSize: 22,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+          const Spacer(),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
             decoration: BoxDecoration(
@@ -120,7 +129,7 @@ class _Header extends StatelessWidget {
                 Icon(Icons.bolt, color: AppColors.primary, size: 14),
                 SizedBox(width: 4),
                 Text(
-                  '1,250 XP اليوم',
+                  '1,250 XP today',
                   style: TextStyle(
                     color: AppColors.primary,
                     fontSize: 12,
@@ -128,15 +137,6 @@ class _Header extends StatelessWidget {
                   ),
                 ),
               ],
-            ),
-          ),
-          const Spacer(),
-          const Text(
-            'لوحة المهام',
-            style: TextStyle(
-              color: AppColors.primary,
-              fontSize: 22,
-              fontWeight: FontWeight.w900,
             ),
           ),
         ],
@@ -161,23 +161,16 @@ class _SectionHeader extends StatelessWidget {
     return Row(
       children: [
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          width: 3,
+          height: 36,
           decoration: BoxDecoration(
-            border: Border.all(color: AppColors.primary, width: 1),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: const Text(
-            'عرض الكل',
-            style: TextStyle(
-              color: AppColors.primary,
-              fontSize: 12,
-              fontWeight: FontWeight.w700,
-            ),
+            color: accent,
+            borderRadius: BorderRadius.circular(2),
           ),
         ),
-        const Spacer(),
+        const SizedBox(width: 10),
         Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               title,
@@ -197,13 +190,20 @@ class _SectionHeader extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(width: 10),
+        const Spacer(),
         Container(
-          width: 3,
-          height: 36,
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
-            color: accent,
-            borderRadius: BorderRadius.circular(2),
+            border: Border.all(color: AppColors.primary, width: 1),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: const Text(
+            'View all',
+            style: TextStyle(
+              color: AppColors.primary,
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+            ),
           ),
         ),
       ],
@@ -280,40 +280,51 @@ class _ProgressQuestCard extends StatelessWidget {
                     ),
                   ),
                 ),
-              const Spacer(),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    title,
-                    style: TextStyle(
-                      color: mutedTitle,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w800,
-                      decoration: completed
-                          ? TextDecoration.lineThrough
-                          : TextDecoration.none,
-                      decorationColor: AppColors.textMuted,
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: TextStyle(
+                        color: mutedTitle,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                        decoration: completed
+                            ? TextDecoration.lineThrough
+                            : TextDecoration.none,
+                        decorationColor: AppColors.textMuted,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    description,
-                    style: TextStyle(
-                      color: completed
-                          ? AppColors.textMuted
-                          : AppColors.textPrimary,
-                      fontSize: 12,
-                      height: 1.5,
+                    const SizedBox(height: 4),
+                    Text(
+                      description,
+                      style: TextStyle(
+                        color: completed
+                            ? AppColors.textMuted
+                            : AppColors.textPrimary,
+                        fontSize: 12,
+                        height: 1.5,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ],
           ),
           const SizedBox(height: 14),
           Row(
             children: [
+              Text(
+                progressLabel,
+                style: TextStyle(
+                  color: progressColor,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(width: 10),
               Expanded(
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(4),
@@ -323,15 +334,6 @@ class _ProgressQuestCard extends StatelessWidget {
                     backgroundColor: AppColors.background,
                     valueColor: AlwaysStoppedAnimation(progressColor),
                   ),
-                ),
-              ),
-              const SizedBox(width: 10),
-              Text(
-                progressLabel,
-                style: TextStyle(
-                  color: progressColor,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
                 ),
               ),
             ],
@@ -372,6 +374,41 @@ class _HabitCard extends StatelessWidget {
       child: Row(
         children: [
           Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: statusColor.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            alignment: Alignment.center,
+            child: Icon(icon, color: iconColor, size: 22),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  subtitle,
+                  style: const TextStyle(
+                    color: AppColors.textMuted,
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 10),
+          Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
             decoration: BoxDecoration(
               color: statusOutlined ? Colors.transparent : statusColor,
@@ -388,39 +425,6 @@ class _HabitCard extends StatelessWidget {
                 fontWeight: FontWeight.w800,
               ),
             ),
-          ),
-          const Spacer(),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                title,
-                style: const TextStyle(
-                  color: AppColors.textPrimary,
-                  fontSize: 15,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                subtitle,
-                style: const TextStyle(
-                  color: AppColors.textMuted,
-                  fontSize: 12,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(width: 10),
-          Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              color: statusColor.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            alignment: Alignment.center,
-            child: Icon(icon, color: iconColor, size: 22),
           ),
         ],
       ),
