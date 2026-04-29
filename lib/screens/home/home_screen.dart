@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../models/goal.dart';
 import '../../models/quest.dart';
+import '../../providers/goal_providers.dart';
 import '../../providers/quest_providers.dart';
 import '../../providers/user_providers.dart';
 import '../../theme/app_colors.dart';
@@ -15,6 +17,7 @@ class HomeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final profileAsync = ref.watch(userProfileStreamProvider);
     final questsAsync = ref.watch(questsStreamProvider);
+    final goalsAsync = ref.watch(goalsStreamProvider);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -80,27 +83,13 @@ class HomeScreen extends ConsumerWidget {
                       const SizedBox(height: 12),
                       _QuestsSection(questsAsync: questsAsync),
                       const SizedBox(height: 24),
-                      const _SectionHeader(title: 'Goals', action: 'View all'),
-                      const SizedBox(height: 12),
-                      Row(
-                        children: const [
-                          Expanded(
-                            child: _GoalCard(
-                              title: 'New home down payment',
-                              icon: Icons.home_outlined,
-                              progress: 0.65,
-                            ),
-                          ),
-                          SizedBox(width: 12),
-                          Expanded(
-                            child: _GoalCard(
-                              title: 'Upcoming Japan trip',
-                              icon: Icons.flight,
-                              progress: 0.4,
-                            ),
-                          ),
-                        ],
+                      _SectionHeader(
+                        title: 'Goals',
+                        action: 'View all',
+                        onActionTap: () => context.go('/home/goals'),
                       ),
+                      const SizedBox(height: 12),
+                      _GoalsSection(goalsAsync: goalsAsync),
                       const SizedBox(height: 24),
                       const _SectionHeader(title: 'Recent Transactions'),
                       const SizedBox(height: 12),
@@ -556,6 +545,54 @@ class _QuestCard extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _GoalsSection extends StatelessWidget {
+  const _GoalsSection({required this.goalsAsync});
+
+  final AsyncValue<List<Goal>> goalsAsync;
+
+  @override
+  Widget build(BuildContext context) {
+    return goalsAsync.when(
+      loading: () => const SizedBox(
+        height: 120,
+        child: Center(
+          child: CircularProgressIndicator(color: AppColors.primary),
+        ),
+      ),
+      error: (e, _) =>
+          const _EmptyQuests(message: 'Failed to load goals'),
+      data: (goals) {
+        if (goals.isEmpty) {
+          return const _EmptyQuests(message: 'No Goals yet');
+        }
+        final visible = goals.take(2).toList();
+        return Row(
+          children: [
+            Expanded(child: _goalCardFor(visible[0])),
+            const SizedBox(width: 12),
+            Expanded(
+              child: visible.length > 1
+                  ? _goalCardFor(visible[1])
+                  : const SizedBox.shrink(),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _goalCardFor(Goal g) {
+    final progress = g.totalAmount <= 0
+        ? 0.0
+        : (g.currentAmount / g.totalAmount).clamp(0.0, 1.0);
+    return _GoalCard(
+      title: g.name,
+      icon: iconForCategory(g.category),
+      progress: progress,
     );
   }
 }

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../components/shell/app_shell.dart';
 import '../screens/calculator/calculator_screen.dart';
+import '../screens/home/goals_screen.dart';
 import '../screens/home/home_screen.dart';
 import '../screens/onboarding/onboarding_expenses_screen.dart';
 import '../screens/onboarding/onboarding_income_screen.dart';
@@ -39,6 +40,12 @@ final routerProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: '/home',
                 builder: (context, state) => const HomeScreen(),
+                routes: [
+                  GoRoute(
+                    path: 'goals',
+                    builder: (context, state) => const GoalsScreen(),
+                  ),
+                ],
               ),
             ],
           ),
