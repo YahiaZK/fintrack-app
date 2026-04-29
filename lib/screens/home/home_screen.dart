@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../models/quest.dart';
+import '../../providers/quest_providers.dart';
 import '../../providers/user_providers.dart';
 import '../../theme/app_colors.dart';
+import '../../utils/quest_icons.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -10,6 +14,7 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final profileAsync = ref.watch(userProfileStreamProvider);
+    final questsAsync = ref.watch(questsStreamProvider);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -67,30 +72,13 @@ class HomeScreen extends ConsumerWidget {
                         ],
                       ),
                       const SizedBox(height: 24),
-                      const _SectionHeader(
+                      _SectionHeader(
                         title: "Today's Quests",
                         action: 'View all',
+                        onActionTap: () => context.go('/quests'),
                       ),
                       const SizedBox(height: 12),
-                      Row(
-                        children: const [
-                          Expanded(
-                            child: _QuestCard(
-                              title: 'Home meals challenge',
-                              icon: Icons.restaurant,
-                              xp: 50,
-                            ),
-                          ),
-                          SizedBox(width: 12),
-                          Expanded(
-                            child: _QuestCard(
-                              title: 'Weekly fuel saving',
-                              icon: Icons.directions_car_filled,
-                              xp: 120,
-                            ),
-                          ),
-                        ],
-                      ),
+                      _QuestsSection(questsAsync: questsAsync),
                       const SizedBox(height: 24),
                       const _SectionHeader(title: 'Goals', action: 'View all'),
                       const SizedBox(height: 12),
@@ -409,10 +397,11 @@ class _MiniStatCard extends StatelessWidget {
 }
 
 class _SectionHeader extends StatelessWidget {
-  const _SectionHeader({required this.title, this.action});
+  const _SectionHeader({required this.title, this.action, this.onActionTap});
 
   final String title;
   final String? action;
+  final VoidCallback? onActionTap;
 
   @override
   Widget build(BuildContext context) {
@@ -428,15 +417,92 @@ class _SectionHeader extends StatelessWidget {
         ),
         const Spacer(),
         if (action != null)
-          Text(
-            action!,
-            style: const TextStyle(
-              color: AppColors.primary,
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
+          InkWell(
+            onTap: onActionTap,
+            borderRadius: BorderRadius.circular(6),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+              child: Text(
+                action!,
+                style: const TextStyle(
+                  color: AppColors.primary,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
             ),
           ),
       ],
+    );
+  }
+}
+
+class _QuestsSection extends StatelessWidget {
+  const _QuestsSection({required this.questsAsync});
+
+  final AsyncValue<List<Quest>> questsAsync;
+
+  @override
+  Widget build(BuildContext context) {
+    return questsAsync.when(
+      loading: () => const SizedBox(
+        height: 120,
+        child: Center(
+          child: CircularProgressIndicator(color: AppColors.primary),
+        ),
+      ),
+      error: (e, _) => _EmptyQuests(message: 'Failed to load quests'),
+      data: (quests) {
+        final daily = quests
+            .where((q) => (q.frequency ?? '').toLowerCase() == 'daily')
+            .toList();
+        if (daily.isEmpty) {
+          return const _EmptyQuests(message: 'No Quests for Today');
+        }
+        final visible = daily.take(2).toList();
+        return Wrap(
+          spacing: 12,
+          runSpacing: 12,
+          children: [
+            for (final q in visible)
+              SizedBox(
+                width: (MediaQuery.of(context).size.width - 16 * 2 - 12) / 2,
+                child: _QuestCard(
+                  title: q.name,
+                  icon: iconForCategory(q.category),
+                  xp: q.xp,
+                ),
+              ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _EmptyQuests extends StatelessWidget {
+  const _EmptyQuests({required this.message});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 22, horizontal: 16),
+      decoration: BoxDecoration(
+        color: AppColors.cardSurface,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      alignment: Alignment.center,
+      child: Text(
+        message,
+        style: const TextStyle(
+          color: AppColors.textMuted,
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
     );
   }
 }

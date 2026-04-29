@@ -8,7 +8,7 @@ import '../screens/home/home_screen.dart';
 import '../screens/onboarding/onboarding_expenses_screen.dart';
 import '../screens/onboarding/onboarding_income_screen.dart';
 import '../screens/onboarding/onboarding_name_screen.dart';
-import '../screens/tasks/tasks_screen.dart';
+import '../screens/quests/quests_screen.dart';
 import '../screens/tools/tools_screen.dart';
 
 final _rootKey = GlobalKey<NavigatorState>();
@@ -45,8 +45,8 @@ final routerProvider = Provider<GoRouter>((ref) {
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: '/tasks',
-                builder: (context, state) => const TasksScreen(),
+                path: '/quests',
+                builder: (context, state) => const QuestsScreen(),
               ),
             ],
           ),

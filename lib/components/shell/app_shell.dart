@@ -15,7 +15,7 @@ class AppShell extends StatelessWidget {
       activeIcon: Icons.shield,
     ),
     _NavItem(
-      label: 'Tasks',
+      label: 'Quests',
       icon: Icons.assignment_outlined,
       activeIcon: Icons.assignment,
     ),
@@ -61,9 +61,7 @@ class AppShell extends StatelessWidget {
       bottomNavigationBar: Container(
         decoration: const BoxDecoration(
           color: AppColors.background,
-          border: Border(
-            top: BorderSide(color: Color(0xFF20232C), width: 1),
-          ),
+          border: Border(top: BorderSide(color: Color(0xFF20232C), width: 1)),
         ),
         child: SafeArea(
           top: false,
@@ -74,8 +72,9 @@ class AppShell extends StatelessWidget {
               children: List.generate(_items.length, (i) {
                 final item = _items[i];
                 final active = i == current;
-                final color =
-                    active ? AppColors.primary : AppColors.textPrimary;
+                final color = active
+                    ? AppColors.primary
+                    : AppColors.textPrimary;
                 return Expanded(
                   child: InkWell(
                     onTap: () => _onTap(i),
