@@ -2,19 +2,27 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../models/user_profile.dart';
 
-const String kUserDocId = 'me';
-
 class UserService {
-  UserService(this._firestore);
+  UserService(this._firestore, this._uid);
 
   final FirebaseFirestore _firestore;
+  final String _uid;
 
   DocumentReference<Map<String, dynamic>> get _doc =>
-      _firestore.collection('users').doc(kUserDocId);
+      _firestore.collection('users').doc(_uid);
 
   Future<void> save(UserProfile profile) {
     return _doc.set({
       ...profile.toMap(),
+      'updatedAt': FieldValue.serverTimestamp(),
+    }, SetOptions(merge: true));
+  }
+
+  Future<void> createInitial({required String email}) {
+    return _doc.set({
+      'email': email,
+      'onboardingCompleted': false,
+      'createdAt': FieldValue.serverTimestamp(),
       'updatedAt': FieldValue.serverTimestamp(),
     }, SetOptions(merge: true));
   }

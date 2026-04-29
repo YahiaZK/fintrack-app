@@ -49,7 +49,10 @@ class HomeScreen extends ConsumerWidget {
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 120),
                   sliver: SliverList.list(
                     children: [
-                      _ProfileCard(name: name),
+                      _ProfileCard(
+                        name: name,
+                        onTap: () => context.go('/home/profile'),
+                      ),
                       const SizedBox(height: 14),
                       _BalanceCard(amount: balance),
                       const SizedBox(height: 12),
@@ -160,19 +163,25 @@ class _Header extends StatelessWidget {
 }
 
 class _ProfileCard extends StatelessWidget {
-  const _ProfileCard({required this.name});
+  const _ProfileCard({required this.name, required this.onTap});
 
   final String name;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(14, 14, 14, 0),
-      decoration: BoxDecoration(
-        color: AppColors.cardSurface,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
         borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
+        child: Ink(
+          padding: const EdgeInsets.fromLTRB(14, 14, 14, 0),
+          decoration: BoxDecoration(
+            color: AppColors.cardSurface,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Column(
         children: [
           Row(
             children: [
@@ -232,6 +241,8 @@ class _ProfileCard extends StatelessWidget {
             ),
           ),
         ],
+      ),
+        ),
       ),
     );
   }

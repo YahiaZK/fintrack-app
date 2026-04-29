@@ -678,7 +678,7 @@ String _money(double v) {
   final s = v
       .toStringAsFixed(0)
       .replaceAllMapped(RegExp(r'(\d)(?=(\d{3})+(?!\d))'), (m) => '${m[1]},');
-  return '$s SAR';
+  return '\$$s';
 }
 
 String _formatDate(DateTime d) {

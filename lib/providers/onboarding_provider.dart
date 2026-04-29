@@ -20,11 +20,15 @@ class OnboardingController extends Notifier<UserProfile> {
   }
 
   Future<void> persistStep(UserProfile partial) {
-    return ref.read(userServiceProvider).save(partial);
+    final service = ref.read(userServiceProvider);
+    if (service == null) return Future.value();
+    return service.save(partial);
   }
 
   Future<void> finalize() {
-    return ref.read(userServiceProvider).save(state);
+    final service = ref.read(userServiceProvider);
+    if (service == null) return Future.value();
+    return service.save(state.copyWith(onboardingCompleted: true));
   }
 }
 
