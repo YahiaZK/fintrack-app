@@ -83,7 +83,10 @@ class ProfileScreen extends ConsumerWidget {
                         ],
                       ),
                       const SizedBox(height: 14),
-                      const _BadgesCard(),
+                      _BadgesCard(
+                        onViewAll: () =>
+                            context.push('/home/profile/badges'),
+                      ),
                       const SizedBox(height: 14),
                       _StatisticsCard(
                         netSavings: netSavings,
@@ -429,7 +432,9 @@ class _StatCard extends StatelessWidget {
 }
 
 class _BadgesCard extends StatelessWidget {
-  const _BadgesCard();
+  const _BadgesCard({required this.onViewAll});
+
+  final VoidCallback onViewAll;
 
   static const _badges = <_Badge>[
     _Badge(label: 'Guardian', icon: Icons.lock, locked: true),
@@ -464,12 +469,26 @@ class _BadgesCard extends StatelessWidget {
                 ),
               ),
               const Spacer(),
-              const Text(
-                'View all',
-                style: TextStyle(
-                  color: AppColors.primary,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
+              GestureDetector(
+                onTap: onViewAll,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: AppColors.primary.withValues(alpha: 0.6),
+                      width: 1.2,
+                    ),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Text(
+                    'View all',
+                    style: TextStyle(
+                      color: AppColors.primary,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
                 ),
               ),
             ],
