@@ -149,7 +149,7 @@ class _Header extends StatelessWidget {
       ),
       child: const Center(
         child: Text(
-          '8usdhf',
+          'FinTrack',
           style: TextStyle(
             color: AppColors.primary,
             fontSize: 24,

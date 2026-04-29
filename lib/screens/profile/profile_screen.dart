@@ -41,7 +41,7 @@ class ProfileScreen extends ConsumerWidget {
               slivers: [
                 SliverToBoxAdapter(
                   child: _Header(
-                    onSettingsTap: () => _showSettingsSheet(context, ref),
+                    onSettingsTap: () => context.push('/home/settings'),
                   ),
                 ),
                 SliverPadding(

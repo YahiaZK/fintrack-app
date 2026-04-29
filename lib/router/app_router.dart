@@ -15,6 +15,7 @@ import '../screens/onboarding/onboarding_income_screen.dart';
 import '../screens/onboarding/onboarding_name_screen.dart';
 import '../screens/profile/profile_screen.dart';
 import '../screens/quests/quests_screen.dart';
+import '../screens/settings/settings_screen.dart';
 import '../screens/tools/tools_screen.dart';
 
 final _rootKey = GlobalKey<NavigatorState>();
@@ -65,6 +66,10 @@ final routerProvider = Provider<GoRouter>((ref) {
                   GoRoute(
                     path: 'profile',
                     builder: (context, state) => const ProfileScreen(),
+                  ),
+                  GoRoute(
+                    path: 'settings',
+                    builder: (context, state) => const SettingsScreen(),
                   ),
                 ],
               ),
