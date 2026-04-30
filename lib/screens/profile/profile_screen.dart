@@ -112,6 +112,10 @@ class ProfileScreen extends ConsumerWidget {
                           ),
                         ),
                       ],
+                      const SizedBox(height: 18),
+                      _SignOutButton(
+                        onTap: () => _signOut(context, ref),
+                      ),
                     ],
                   ),
                 ),
@@ -121,6 +125,13 @@ class ProfileScreen extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  Future<void> _signOut(BuildContext context, WidgetRef ref) async {
+    await ref.read(authServiceProvider).signOut();
+    if (context.mounted) {
+      context.go('/auth/sign-in');
+    }
   }
 
   void _showSettingsSheet(BuildContext context, WidgetRef ref) {
@@ -164,6 +175,39 @@ class ProfileScreen extends ConsumerWidget {
           ),
         );
       },
+    );
+  }
+}
+
+class _SignOutButton extends StatelessWidget {
+  const _SignOutButton({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton.icon(
+        onPressed: onTap,
+        icon: const Icon(Icons.logout, size: 18),
+        label: const Text(
+          'Sign out',
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.danger,
+          foregroundColor: Colors.white,
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          padding: const EdgeInsets.symmetric(vertical: 16),
+        ),
+      ),
     );
   }
 }
