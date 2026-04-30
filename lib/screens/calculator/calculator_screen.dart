@@ -1,8 +1,173 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'dart:math';
 
 import '../../theme/app_colors.dart';
 
+// ─── US Average Monthly Costs (2024 data) ────────────────────────────────────
+// Sources: BLS Consumer Expenditure Survey, EIA, USDA, AAA
+class _UsAverages {
+  // Food: USDA moderate-cost plan ~$400/month for one adult
+  static const double monthlyFood = 400.0;
+
+  // Transport: AAA avg car ownership ~$12,182/yr = ~$1,015/mo
+  // We use a commuter-only figure for fairness: gas+insurance split = ~$400/mo
+  static const double monthlyTransport = 400.0;
+
+  // Electricity: EIA avg residential ~$137/mo
+  static const double monthlyElectricity = 137.0;
+
+  // Internet: FCC/BroadbandNow avg ~$64/mo
+  static const double monthlyInternet = 64.0;
+
+  // Rent: Census Bureau median asking rent ~$1,400/mo
+  static const double monthlyRent = 1400.0;
+
+  // Healthcare: KFF avg individual premium + OOP ~$500/mo
+  static const double monthlyHealthcare = 500.0;
+
+  // Leisure budget assumption: ~15% of avg take-home ($4,000/mo) = $600
+  static const double monthlyLeisure = 600.0;
+
+  static double get dailyFood => monthlyFood / 30;
+  static double get dailyTransport => monthlyTransport / 30;
+  static double get dailyElectricity => monthlyElectricity / 30;
+  static double get dailyInternet => monthlyInternet / 30;
+  static double get dailyRent => monthlyRent / 30;
+  static double get dailyHealthcare => monthlyHealthcare / 30;
+}
+
+// ─── Calculation Logic ────────────────────────────────────────────────────────
+class _CalcResult {
+  final double price;
+  final double foodDays;
+  final double transportDays;
+  final double electricityDays;
+  final double internetDays;
+  final double rentDays;
+  final double healthcareDays;
+  final double leisurePercent;
+  final String riskLevel;   // 'low' | 'medium' | 'high'
+  final String riskLabel;
+  final String riskMessage;
+  final List<_SacrificeOption> sacrifices;
+  final int xpReward;
+
+  const _CalcResult({
+    required this.price,
+    required this.foodDays,
+    required this.transportDays,
+    required this.electricityDays,
+    required this.internetDays,
+    required this.rentDays,
+    required this.healthcareDays,
+    required this.leisurePercent,
+    required this.riskLevel,
+    required this.riskLabel,
+    required this.riskMessage,
+    required this.sacrifices,
+    required this.xpReward,
+  });
+}
+
+class _SacrificeOption {
+  final String label;
+  final Color color;
+  const _SacrificeOption(this.label, this.color);
+}
+
+_CalcResult _calculate(double price) {
+  final foodDays = price / _UsAverages.dailyFood;
+  final transportDays = price / _UsAverages.dailyTransport;
+  final electricityDays = price / _UsAverages.dailyElectricity;
+  final internetDays = price / _UsAverages.dailyInternet;
+  final rentDays = price / _UsAverages.dailyRent;
+  final healthcareDays = price / _UsAverages.dailyHealthcare;
+  final leisurePercent = (price / _UsAverages.monthlyLeisure).clamp(0.0, 1.0);
+  final leisurePct = leisurePercent * 100;
+
+  String riskLevel, riskLabel, riskMessage;
+  int xpReward;
+
+  if (leisurePct <= 20) {
+    riskLevel = 'low';
+    riskLabel = 'Smart spend!';
+    riskMessage = 'This is only ${leisurePct.toStringAsFixed(0)}% of your monthly leisure budget. Looks manageable!';
+    xpReward = 100;
+  } else if (leisurePct <= 50) {
+    riskLevel = 'medium';
+    riskLabel = 'Think twice!';
+    riskMessage = 'This would consume ${leisurePct.toStringAsFixed(0)}% of your leisure budget for this month.';
+    xpReward = 300;
+  } else if (leisurePct <= 80) {
+    riskLevel = 'high';
+    riskLabel = 'Risky decision!';
+    riskMessage = 'This may use up to ${leisurePct.toStringAsFixed(0)}% of your leisure budget for this month.';
+    xpReward = 600;
+  } else {
+    riskLevel = 'high';
+    riskLabel = 'Danger zone!';
+    riskMessage = 'This exceeds your entire monthly leisure budget (${leisurePct.toStringAsFixed(0)}%). Reconsider!';
+    xpReward = 800;
+  }
+
+  // Dynamic sacrifice suggestions based on price range
+  final sacrifices = <_SacrificeOption>[];
+  if (price < 20) {
+    sacrifices.addAll([
+      const _SacrificeOption('A coffee subscription', AppColors.warning),
+      const _SacrificeOption('A streaming service day', AppColors.danger),
+      const _SacrificeOption('Lunch out', AppColors.primary),
+    ]);
+  } else if (price < 100) {
+    sacrifices.addAll([
+      const _SacrificeOption('Membership upgrade', AppColors.warning),
+      const _SacrificeOption('A stock in your portfolio', AppColors.danger),
+      const _SacrificeOption('Emergency savings', AppColors.primary),
+    ]);
+  } else if (price < 500) {
+    sacrifices.addAll([
+      const _SacrificeOption('Monthly investment', AppColors.warning),
+      const _SacrificeOption('Vacation fund', AppColors.danger),
+      const _SacrificeOption('3 months of internet', AppColors.primary),
+    ]);
+  } else {
+    sacrifices.addAll([
+      const _SacrificeOption('Month of rent', AppColors.warning),
+      const _SacrificeOption('Emergency fund goal', AppColors.danger),
+      const _SacrificeOption('Stock portfolio contribution', AppColors.primary),
+    ]);
+  }
+
+  return _CalcResult(
+    price: price,
+    foodDays: foodDays,
+    transportDays: transportDays,
+    electricityDays: electricityDays,
+    internetDays: internetDays,
+    rentDays: rentDays,
+    healthcareDays: healthcareDays,
+    leisurePercent: leisurePercent,
+    riskLevel: riskLevel,
+    riskLabel: riskLabel,
+    riskMessage: riskMessage,
+    sacrifices: sacrifices,
+    xpReward: xpReward,
+  );
+}
+
+String _formatDays(double days) {
+  if (days < 1) {
+    final hours = (days * 24).round();
+    return '${hours}h';
+  } else if (days < 10) {
+    return '${days.toStringAsFixed(1)}d';
+  } else {
+    return '${days.toStringAsFixed(0)}d';
+  }
+}
+
+// ─── Widget ───────────────────────────────────────────────────────────────────
 class CalculatorScreen extends StatefulWidget {
   const CalculatorScreen({super.key});
 
@@ -13,6 +178,20 @@ class CalculatorScreen extends StatefulWidget {
 class _CalculatorScreenState extends State<CalculatorScreen> {
   final _itemController = TextEditingController();
   final _priceController = TextEditingController();
+  _CalcResult? _result;
+
+  void _onPriceChanged(String value) {
+    final price = double.tryParse(value);
+    setState(() {
+      _result = (price != null && price > 0) ? _calculate(price) : null;
+    });
+  }
+
+  void _reset() {
+    _itemController.clear();
+    _priceController.clear();
+    setState(() => _result = null);
+  }
 
   @override
   void dispose() {
@@ -23,6 +202,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final result = _result;
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -39,96 +219,11 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   _FormCard(
                     itemController: _itemController,
                     priceController: _priceController,
+                    onPriceChanged: _onPriceChanged,
                   ),
-                  const SizedBox(height: 24),
-                  const _SectionTitle(
-                    'How many days of essentials does this cost?',
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: const [
-                      Expanded(
-                        child: _EquivalenceCard(
-                          label: 'Food',
-                          value: '4.5 days',
-                          icon: Icons.restaurant,
-                        ),
-                      ),
-                      SizedBox(width: 12),
-                      Expanded(
-                        child: _EquivalenceCard(
-                          label: 'Transport',
-                          value: '12 days',
-                          icon: Icons.directions_car_filled,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-                  const _SectionTitle('What will you sacrifice?'),
-                  const SizedBox(height: 12),
-                  Wrap(
-                    spacing: 10,
-                    runSpacing: 10,
-                    children: const [
-                      _SacrificeChip(
-                        label: 'Membership upgrade',
-                        color: AppColors.warning,
-                      ),
-                      _SacrificeChip(
-                        label: 'A stock in your portfolio',
-                        color: AppColors.danger,
-                      ),
-                      _SacrificeChip(
-                        label: 'Emergency savings',
-                        color: AppColors.primary,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-                  const _DecisionCard(),
-                  const SizedBox(height: 16),
-                  const _ChallengeBanner(),
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton(
-                          onPressed: () {},
-                          style: OutlinedButton.styleFrom(
-                            minimumSize: const Size.fromHeight(52),
-                            side: const BorderSide(
-                              color: AppColors.level,
-                              width: 1.5,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                          child: const Text(
-                            'Save for later',
-                            style: TextStyle(
-                              color: AppColors.textPrimary,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: () {},
-                          style: ElevatedButton.styleFrom(
-                            minimumSize: const Size.fromHeight(52),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                          child: const Text('Skip it'),
-                        ),
-                      ),
-                    ],
-                  ),
+                  if (result != null) ..._buildResults(result),
+                  if (result == null)
+                    _buildEmptyState(),
                 ],
               ),
             ),
@@ -136,6 +231,156 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
         ),
       ),
     );
+  }
+
+  Widget _buildEmptyState() {
+    return Padding(
+      padding: const EdgeInsets.only(top: 40),
+      child: Column(
+        children: const [
+          Icon(Icons.calculate_outlined, color: AppColors.textMuted, size: 48),
+          SizedBox(height: 12),
+          Text(
+            'Enter a price to see\nyour reality check',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: AppColors.textMuted, fontSize: 14, height: 1.5),
+          ),
+        ],
+      ),
+    );
+  }
+
+  List<Widget> _buildResults(_CalcResult result) {
+    return [
+      const SizedBox(height: 24),
+      const _SectionTitle('How many days of essentials does this cost?'),
+      const SizedBox(height: 6),
+      Text(
+        'Based on US averages (2024)',
+        style: const TextStyle(color: AppColors.textMuted, fontSize: 11),
+      ),
+      const SizedBox(height: 12),
+      // First row: Food & Transport
+      Row(
+        children: [
+          Expanded(
+            child: _EquivalenceCard(
+              label: 'Food',
+              value: _formatDays(result.foodDays),
+              subtitle: '\${_UsAverages.dailyFood.toStringAsFixed(0)}/day avg',
+              icon: Icons.restaurant,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: _EquivalenceCard(
+              label: 'Transport',
+              value: _formatDays(result.transportDays),
+              subtitle: '\${_UsAverages.dailyTransport.toStringAsFixed(0)}/day avg',
+              icon: Icons.directions_car_filled,
+            ),
+          ),
+        ],
+      ),
+      const SizedBox(height: 12),
+      // Second row: Electricity & Internet
+      Row(
+        children: [
+          Expanded(
+            child: _EquivalenceCard(
+              label: 'Electricity',
+              value: _formatDays(result.electricityDays),
+              subtitle: '\${_UsAverages.dailyElectricity.toStringAsFixed(1)}/day avg',
+              icon: Icons.bolt,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: _EquivalenceCard(
+              label: 'Internet',
+              value: _formatDays(result.internetDays),
+              subtitle: '\${_UsAverages.dailyInternet.toStringAsFixed(1)}/day avg',
+              icon: Icons.wifi,
+            ),
+          ),
+        ],
+      ),
+      const SizedBox(height: 12),
+      // Third row: Rent & Healthcare
+      Row(
+        children: [
+          Expanded(
+            child: _EquivalenceCard(
+              label: 'Rent',
+              value: _formatDays(result.rentDays),
+              subtitle: '\${_UsAverages.dailyRent.toStringAsFixed(0)}/day avg',
+              icon: Icons.home_outlined,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: _EquivalenceCard(
+              label: 'Healthcare',
+              value: _formatDays(result.healthcareDays),
+              subtitle: '\${_UsAverages.dailyHealthcare.toStringAsFixed(0)}/day avg',
+              icon: Icons.health_and_safety_outlined,
+            ),
+          ),
+        ],
+      ),
+      const SizedBox(height: 24),
+      const _SectionTitle('What will you sacrifice?'),
+      const SizedBox(height: 12),
+      Wrap(
+        spacing: 10,
+        runSpacing: 10,
+        children: result.sacrifices
+            .map((s) => _SacrificeChip(label: s.label, color: s.color))
+            .toList(),
+      ),
+      const SizedBox(height: 24),
+      _ChallengeBanner(xp: result.xpReward),
+      const SizedBox(height: 16),
+      Row(
+        children: [
+          Expanded(
+            child: OutlinedButton(
+              onPressed: () {},
+              style: OutlinedButton.styleFrom(
+                minimumSize: const Size.fromHeight(52),
+                side: const BorderSide(
+                  color: AppColors.level,
+                  width: 1.5,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: const Text(
+                'Proceed',
+                style: TextStyle(
+                  color: AppColors.textPrimary,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: ElevatedButton(
+              onPressed: _reset,
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size.fromHeight(52),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: const Text('Skip it'),
+            ),
+          ),
+        ],
+      ),
+    ];
   }
 }
 
@@ -195,10 +440,12 @@ class _FormCard extends StatelessWidget {
   const _FormCard({
     required this.itemController,
     required this.priceController,
+    required this.onPriceChanged,
   });
 
   final TextEditingController itemController;
   final TextEditingController priceController;
+  final ValueChanged<String> onPriceChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -271,6 +518,7 @@ class _FormCard extends StatelessWidget {
             inputFormatters: [
               FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
             ],
+            onChanged: onPriceChanged,
             style: const TextStyle(
               color: AppColors.textPrimary,
               fontSize: 18,
@@ -347,11 +595,13 @@ class _EquivalenceCard extends StatelessWidget {
     required this.label,
     required this.value,
     required this.icon,
+    this.subtitle,
   });
 
   final String label;
   final String value;
   final IconData icon;
+  final String? subtitle;
 
   @override
   Widget build(BuildContext context) {
@@ -395,6 +645,17 @@ class _EquivalenceCard extends StatelessWidget {
               fontWeight: FontWeight.w900,
             ),
           ),
+          if (subtitle != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 2),
+              child: Text(
+                subtitle!,
+                style: const TextStyle(
+                  color: AppColors.textMuted,
+                  fontSize: 10,
+                ),
+              ),
+            ),
         ],
       ),
     );
@@ -429,16 +690,35 @@ class _SacrificeChip extends StatelessWidget {
 }
 
 class _DecisionCard extends StatelessWidget {
-  const _DecisionCard();
+  const _DecisionCard({required this.result});
+
+  final _CalcResult result;
+
+  Color get _borderColor {
+    switch (result.riskLevel) {
+      case 'low': return AppColors.primary;
+      case 'medium': return AppColors.warning;
+      default: return AppColors.danger;
+    }
+  }
+
+  IconData get _icon {
+    switch (result.riskLevel) {
+      case 'low': return Icons.check_circle_outline;
+      case 'medium': return Icons.info_outline;
+      default: return Icons.warning_amber_rounded;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final color = _borderColor;
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: AppColors.cardSurface,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.warning, width: 1.2),
+        border: Border.all(color: color, width: 1.2),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -449,33 +729,29 @@ class _DecisionCard extends StatelessWidget {
                 width: 38,
                 height: 38,
                 decoration: BoxDecoration(
-                  color: AppColors.warning.withValues(alpha: 0.18),
+                  color: color.withValues(alpha: 0.18),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 alignment: Alignment.center,
-                child: const Icon(
-                  Icons.warning_amber_rounded,
-                  color: AppColors.warning,
-                  size: 22,
-                ),
+                child: Icon(_icon, color: color, size: 22),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
+                  children: [
                     Text(
-                      'Risky decision!',
+                      result.riskLabel,
                       style: TextStyle(
-                        color: AppColors.warning,
+                        color: color,
                         fontSize: 15,
                         fontWeight: FontWeight.w900,
                       ),
                     ),
-                    SizedBox(height: 4),
+                    const SizedBox(height: 4),
                     Text(
-                      'This may use up to 70% of your leisure budget for this month.',
-                      style: TextStyle(
+                      result.riskMessage,
+                      style: const TextStyle(
                         color: AppColors.textMuted,
                         fontSize: 12,
                         height: 1.4,
@@ -490,11 +766,16 @@ class _DecisionCard extends StatelessWidget {
           ClipRRect(
             borderRadius: BorderRadius.circular(4),
             child: LinearProgressIndicator(
-              value: 0.7,
+              value: result.leisurePercent,
               minHeight: 6,
               backgroundColor: AppColors.background,
-              valueColor: const AlwaysStoppedAnimation(AppColors.warning),
+              valueColor: AlwaysStoppedAnimation(color),
             ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            '${(result.leisurePercent * 100).toStringAsFixed(0)}% of monthly leisure budget (\${_UsAverages.monthlyLeisure.toStringAsFixed(0)} avg)',
+            style: const TextStyle(color: AppColors.textMuted, fontSize: 10),
           ),
         ],
       ),
@@ -503,7 +784,9 @@ class _DecisionCard extends StatelessWidget {
 }
 
 class _ChallengeBanner extends StatelessWidget {
-  const _ChallengeBanner();
+  const _ChallengeBanner({required this.xp});
+
+  final int xp;
 
   @override
   Widget build(BuildContext context) {
@@ -535,9 +818,9 @@ class _ChallengeBanner extends StatelessWidget {
             'Resist temptation: ',
             style: TextStyle(color: AppColors.textMuted, fontSize: 12),
           ),
-          const Text(
-            '+600 XP',
-            style: TextStyle(
+          Text(
+            '+$xp XP',
+            style: const TextStyle(
               color: AppColors.primary,
               fontSize: 12,
               fontWeight: FontWeight.w800,
