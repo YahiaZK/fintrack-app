@@ -50,9 +50,10 @@ class ProfileScreen extends ConsumerWidget {
                     children: [
                       _ProfileHeaderCard(
                         name: name,
-                        title: 'Pro Trader',
-                        level: 15,
+                        title: 'Gold II',
+                        level: 8,
                         progress: 0.75,
+                        onTap: () => context.push('/home/profile/ranks'),
                       ),
                       const SizedBox(height: 14),
                       Row(
@@ -84,8 +85,7 @@ class ProfileScreen extends ConsumerWidget {
                       ),
                       const SizedBox(height: 14),
                       _BadgesCard(
-                        onViewAll: () =>
-                            context.push('/home/profile/badges'),
+                        onViewAll: () => context.push('/home/profile/badges'),
                       ),
                       const SizedBox(height: 14),
                       _StatisticsCard(
@@ -217,114 +217,119 @@ class _ProfileHeaderCard extends StatelessWidget {
     required this.title,
     required this.level,
     required this.progress,
+    required this.onTap,
   });
 
   final String name;
   final String title;
   final int level;
   final double progress;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: AppColors.cardSurface,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              _Avatar(level: level),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      name,
-                      style: const TextStyle(
-                        color: AppColors.textPrimary,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w800,
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: AppColors.cardSurface,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                _Avatar(level: level),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        name,
+                        style: const TextStyle(
+                          color: AppColors.textPrimary,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w800,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.workspace_premium,
-                          color: AppColors.warning,
-                          size: 14,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          title,
-                          style: const TextStyle(
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.workspace_premium,
                             color: AppColors.warning,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
+                            size: 14,
                           ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  color: AppColors.background,
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(
-                    color: AppColors.primary.withValues(alpha: 0.4),
+                          const SizedBox(width: 4),
+                          Text(
+                            title,
+                            style: const TextStyle(
+                              color: AppColors.warning,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
-                alignment: Alignment.center,
-                child: const Icon(
-                  Icons.location_on_outlined,
-                  color: AppColors.primary,
-                  size: 18,
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: AppColors.background,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: AppColors.primary.withValues(alpha: 0.4),
+                    ),
+                  ),
+                  alignment: Alignment.center,
+                  child: const Icon(
+                    Icons.location_on_outlined,
+                    color: AppColors.primary,
+                    size: 18,
+                  ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 18),
-          Row(
-            children: [
-              const Text(
-                'Progress to next level',
-                style: TextStyle(
-                  color: AppColors.textPrimary,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const Spacer(),
-              Text(
-                '${(progress * 100).round()}%',
-                style: const TextStyle(
-                  color: AppColors.primary,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(4),
-            child: LinearProgressIndicator(
-              value: progress,
-              minHeight: 6,
-              backgroundColor: AppColors.background,
-              valueColor: const AlwaysStoppedAnimation(AppColors.primary),
+              ],
             ),
-          ),
-        ],
+            const SizedBox(height: 18),
+            Row(
+              children: [
+                const Text(
+                  'Progress to next level',
+                  style: TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const Spacer(),
+                Text(
+                  '${(progress * 100).round()}%',
+                  style: const TextStyle(
+                    color: AppColors.primary,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(4),
+              child: LinearProgressIndicator(
+                value: progress,
+                minHeight: 6,
+                backgroundColor: AppColors.background,
+                valueColor: const AlwaysStoppedAnimation(AppColors.primary),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -473,7 +478,9 @@ class _BadgesCard extends StatelessWidget {
                 onTap: onViewAll,
                 child: Container(
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 10, vertical: 5),
+                    horizontal: 10,
+                    vertical: 5,
+                  ),
                   decoration: BoxDecoration(
                     border: Border.all(
                       color: AppColors.primary.withValues(alpha: 0.6),

@@ -15,6 +15,7 @@ import '../screens/onboarding/onboarding_income_screen.dart';
 import '../screens/onboarding/onboarding_name_screen.dart';
 import '../screens/profile/badges_screen.dart';
 import '../screens/profile/profile_screen.dart';
+import '../screens/profile/ranks_screen.dart';
 import '../screens/quests/quests_screen.dart';
 import '../screens/settings/settings_screen.dart';
 import '../screens/tools/tools_screen.dart';
@@ -71,6 +72,10 @@ final routerProvider = Provider<GoRouter>((ref) {
                       GoRoute(
                         path: 'badges',
                         builder: (context, state) => const BadgesScreen(),
+                      ),
+                      GoRoute(
+                        path: 'ranks',
+                        builder: (context, state) => const RanksScreen(),
                       ),
                     ],
                   ),
