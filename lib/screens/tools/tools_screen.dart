@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../theme/app_colors.dart';
 
@@ -17,18 +18,20 @@ class ToolsScreen extends StatelessWidget {
             SliverPadding(
               padding: const EdgeInsets.fromLTRB(20, 24, 20, 120),
               sliver: SliverList.list(
-                children: const [
+                children: [
                   _ToolCard(
                     levelLabel: 'Level 1',
-                    title: 'Emergency Fund',
-                    description: 'Save your first 1,000 for emergencies.',
-                    lessonLine: 'Patience is the key to growth.',
+                    title: 'Transaction Manager',
+                    description:
+                        'Track income & expenses to keep your budget accurate.',
+                    lessonLine: 'Every dirham counts when tracked.',
                     tag: 'Basic',
-                    icon: Icons.account_balance,
+                    icon: Icons.account_balance_wallet,
                     locked: false,
+                    onTap: () => context.push('/tools/transaction-manager'),
                   ),
-                  SizedBox(height: 28),
-                  _ToolCard(
+                  const SizedBox(height: 28),
+                  const _ToolCard(
                     levelLabel: 'Level 5',
                     title: '',
                     description: 'Unlocks at level 11',
@@ -37,8 +40,8 @@ class ToolsScreen extends StatelessWidget {
                     icon: Icons.lock,
                     locked: true,
                   ),
-                  SizedBox(height: 28),
-                  _ToolCard(
+                  const SizedBox(height: 28),
+                  const _ToolCard(
                     levelLabel: 'Level 10',
                     title: '',
                     description: 'Unlocks at level 15',
@@ -47,8 +50,8 @@ class ToolsScreen extends StatelessWidget {
                     icon: Icons.lock,
                     locked: true,
                   ),
-                  SizedBox(height: 28),
-                  _ToolCard(
+                  const SizedBox(height: 28),
+                  const _ToolCard(
                     levelLabel: 'Level 20',
                     title: '',
                     description: 'Unlocks at level 20',
@@ -130,6 +133,7 @@ class _ToolCard extends StatelessWidget {
     required this.tag,
     required this.icon,
     required this.locked,
+    this.onTap,
   });
 
   final String levelLabel;
@@ -139,9 +143,29 @@ class _ToolCard extends StatelessWidget {
   final String tag;
   final IconData icon;
   final bool locked;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
+    final body = locked
+        ? _LockedBody(description: description)
+        : _UnlockedBody(
+            title: title,
+            description: description,
+            lessonLine: lessonLine,
+            tag: tag,
+            icon: icon,
+          );
+    final wrappedBody = (!locked && onTap != null)
+        ? Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: onTap,
+              borderRadius: BorderRadius.circular(14),
+              child: body,
+            ),
+          )
+        : body;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -176,15 +200,7 @@ class _ToolCard extends StatelessWidget {
           alignment: Alignment.centerLeft,
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 280),
-            child: locked
-                ? _LockedBody(description: description)
-                : _UnlockedBody(
-                    title: title,
-                    description: description,
-                    lessonLine: lessonLine,
-                    tag: tag,
-                    icon: icon,
-                  ),
+            child: wrappedBody,
           ),
         ),
       ],

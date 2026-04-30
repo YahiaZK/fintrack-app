@@ -4,8 +4,10 @@ import 'package:go_router/go_router.dart';
 
 import '../../models/goal.dart';
 import '../../models/quest.dart';
+import '../../models/transaction_entry.dart';
 import '../../providers/goal_providers.dart';
 import '../../providers/quest_providers.dart';
+import '../../providers/transaction_providers.dart';
 import '../../providers/user_providers.dart';
 import '../../theme/app_colors.dart';
 import '../../utils/quest_icons.dart';
@@ -18,6 +20,7 @@ class HomeScreen extends ConsumerWidget {
     final profileAsync = ref.watch(userProfileStreamProvider);
     final questsAsync = ref.watch(questsStreamProvider);
     final goalsAsync = ref.watch(goalsStreamProvider);
+    final txAsync = ref.watch(transactionsStreamProvider);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -37,9 +40,13 @@ class HomeScreen extends ConsumerWidget {
         ),
         data: (profile) {
           final name = profile?.name ?? 'New Warrior';
-          final income = profile?.monthlyIncome ?? 0;
-          final expenses = profile?.monthlyExpenses ?? 0;
-          final balance = income - expenses;
+          final monthlyIncome = profile?.monthlyIncome ?? 0;
+          final monthlyExpenses = profile?.monthlyExpenses ?? 0;
+          final netWorth =
+              profile?.totalNetWorth ?? monthlyIncome;
+          final spent =
+              profile?.totalSpent ?? monthlyExpenses;
+          final saved = profile?.totalSaved ?? 0;
           return SafeArea(
             bottom: false,
             child: CustomScrollView(
@@ -54,14 +61,14 @@ class HomeScreen extends ConsumerWidget {
                         onTap: () => context.go('/home/profile'),
                       ),
                       const SizedBox(height: 14),
-                      _BalanceCard(amount: balance),
+                      _BalanceCard(label: 'Total Net Worth', amount: netWorth),
                       const SizedBox(height: 12),
                       Row(
                         children: [
                           Expanded(
                             child: _MiniStatCard(
                               label: 'Saved',
-                              amount: balance > 0 ? balance : 0,
+                              amount: saved,
                               icon: Icons.savings_outlined,
                               accent: AppColors.primary,
                             ),
@@ -70,9 +77,31 @@ class HomeScreen extends ConsumerWidget {
                           Expanded(
                             child: _MiniStatCard(
                               label: 'Spent',
-                              amount: expenses,
+                              amount: spent,
                               icon: Icons.trending_down_rounded,
                               accent: AppColors.danger,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _MiniStatCard(
+                              label: 'Monthly Income',
+                              amount: monthlyIncome,
+                              icon: Icons.trending_up_rounded,
+                              accent: AppColors.primary,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: _MiniStatCard(
+                              label: 'Monthly Expenses',
+                              amount: monthlyExpenses,
+                              icon: Icons.calendar_month_outlined,
+                              accent: AppColors.warning,
                             ),
                           ),
                         ],
@@ -96,35 +125,7 @@ class HomeScreen extends ConsumerWidget {
                       const SizedBox(height: 24),
                       const _SectionHeader(title: 'Recent Transactions'),
                       const SizedBox(height: 12),
-                      const _TransactionTile(
-                        title: 'Starbucks',
-                        subtitle: '2 hours ago',
-                        amount: -28.5,
-                        tag: 'Leisure',
-                        icon: Icons.local_cafe,
-                        iconBg: Color(0xFF3A2A22),
-                        iconColor: Color(0xFFC58A6E),
-                      ),
-                      const SizedBox(height: 10),
-                      const _TransactionTile(
-                        title: 'Incoming transfer',
-                        subtitle: 'Yesterday',
-                        amount: 1500,
-                        tag: 'Salary',
-                        icon: Icons.account_balance_wallet,
-                        iconBg: Color(0xFF1F2D2A),
-                        iconColor: AppColors.primary,
-                      ),
-                      const SizedBox(height: 10),
-                      const _TransactionTile(
-                        title: 'ADNOC Station',
-                        subtitle: 'Yesterday',
-                        amount: -120.0,
-                        tag: '',
-                        icon: Icons.local_gas_station,
-                        iconBg: Color(0xFF3A2A22),
-                        iconColor: Color(0xFFE0A574),
-                      ),
+                      _RecentTransactions(txAsync: txAsync),
                     ],
                   ),
                 ),
@@ -296,8 +297,9 @@ class _HexClipper extends CustomClipper<Path> {
 }
 
 class _BalanceCard extends StatelessWidget {
-  const _BalanceCard({required this.amount});
+  const _BalanceCard({required this.label, required this.amount});
 
+  final String label;
   final double amount;
 
   @override
@@ -314,9 +316,12 @@ class _BalanceCard extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Remaining Budget',
-                style: TextStyle(color: AppColors.textMuted, fontSize: 13),
+              Text(
+                label,
+                style: const TextStyle(
+                  color: AppColors.textMuted,
+                  fontSize: 13,
+                ),
               ),
               Text(
                 '\$${_format(amount)}',
@@ -761,6 +766,74 @@ class _TransactionTile extends StatelessWidget {
       ),
     );
   }
+}
+
+class _RecentTransactions extends StatelessWidget {
+  const _RecentTransactions({required this.txAsync});
+
+  final AsyncValue<List<TransactionEntry>> txAsync;
+
+  @override
+  Widget build(BuildContext context) {
+    return txAsync.when(
+      loading: () => const SizedBox(
+        height: 80,
+        child: Center(
+          child: CircularProgressIndicator(color: AppColors.primary),
+        ),
+      ),
+      error: (e, _) =>
+          const _EmptyQuests(message: 'Failed to load transactions'),
+      data: (list) {
+        if (list.isEmpty) {
+          return const _EmptyQuests(message: 'No transactions yet');
+        }
+        final visible = list.take(3).toList();
+        final tiles = <Widget>[];
+        for (var i = 0; i < visible.length; i++) {
+          if (i > 0) tiles.add(const SizedBox(height: 10));
+          final e = visible[i];
+          final isIncome = e.type == TransactionType.income;
+          tiles.add(
+            _TransactionTile(
+              title: e.name.isEmpty ? '(unnamed)' : e.name,
+              subtitle: _relativeTime(e.date),
+              amount: isIncome ? e.amount : -e.amount,
+              tag: e.category,
+              icon: iconForCategory(e.category),
+              iconBg: (isIncome ? AppColors.primary : AppColors.warning)
+                  .withValues(alpha: 0.18),
+              iconColor: isIncome ? AppColors.primary : AppColors.warning,
+            ),
+          );
+        }
+        return Column(children: tiles);
+      },
+    );
+  }
+}
+
+String _relativeTime(DateTime when) {
+  final diff = DateTime.now().difference(when);
+  if (diff.inMinutes < 1) return 'Just now';
+  if (diff.inHours < 1) return '${diff.inMinutes}m ago';
+  if (diff.inDays < 1) return '${diff.inHours}h ago';
+  if (diff.inDays < 7) return '${diff.inDays}d ago';
+  const months = [
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
+  ];
+  return '${months[when.month - 1]} ${when.day}';
 }
 
 String _format(double v) {

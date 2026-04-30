@@ -20,6 +20,7 @@ import '../screens/profile/ranks_screen.dart';
 import '../screens/quests/quests_screen.dart';
 import '../screens/settings/settings_screen.dart';
 import '../screens/tools/tools_screen.dart';
+import '../screens/tools/transaction_manager_screen.dart';
 
 final _rootKey = GlobalKey<NavigatorState>();
 
@@ -102,6 +103,13 @@ final routerProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: '/tools',
                 builder: (context, state) => const ToolsScreen(),
+                routes: [
+                  GoRoute(
+                    path: 'transaction-manager',
+                    builder: (context, state) =>
+                        const TransactionManagerScreen(),
+                  ),
+                ],
               ),
             ],
           ),

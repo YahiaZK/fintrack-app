@@ -28,7 +28,16 @@ class OnboardingController extends Notifier<UserProfile> {
   Future<void> finalize() {
     final service = ref.read(userServiceProvider);
     if (service == null) return Future.value();
-    return service.save(state.copyWith(onboardingCompleted: true));
+    final income = state.monthlyIncome ?? 0;
+    final expenses = state.monthlyExpenses ?? 0;
+    return service.save(
+      state.copyWith(
+        onboardingCompleted: true,
+        totalNetWorth: income,
+        totalSpent: expenses,
+        totalSaved: 0,
+      ),
+    );
   }
 }
 
