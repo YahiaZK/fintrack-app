@@ -214,8 +214,8 @@ class _BadgesGrid extends StatelessWidget {
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 3,
         crossAxisSpacing: 12,
-        mainAxisSpacing: 12,
-        childAspectRatio: 0.85,
+        mainAxisSpacing: 14,
+        childAspectRatio: 0.68,
       ),
       itemCount: badges.length,
       itemBuilder: (context, index) => _BadgeCard(badge: badges[index]),
@@ -250,14 +250,14 @@ class _BadgeCard extends StatelessWidget {
             width: 1.2,
           ),
         ),
-        padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 10),
+        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             // Badge icon circle
             Container(
-              width: 52,
-              height: 52,
+              width: 48,
+              height: 48,
               decoration: BoxDecoration(
                 color: isLocked
                     ? AppColors.background
@@ -274,10 +274,10 @@ class _BadgeCard extends StatelessWidget {
               child: Icon(
                 badge.icon,
                 color: isLocked ? AppColors.textMuted : color,
-                size: 24,
+                size: 22,
               ),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 9),
             // Label
             Text(
               badge.label,
@@ -286,7 +286,7 @@ class _BadgeCard extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 color: isLocked ? AppColors.textMuted : AppColors.textPrimary,
-                fontSize: 11,
+                fontSize: 10.5,
                 fontWeight: FontWeight.w700,
               ),
             ),
