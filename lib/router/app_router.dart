@@ -7,6 +7,7 @@ import '../providers/auth_providers.dart';
 import '../providers/user_providers.dart';
 import '../screens/auth/sign_in_screen.dart';
 import '../screens/auth/sign_up_screen.dart';
+import '../screens/chat/chat_screen.dart';
 import '../screens/calculator/calculator_screen.dart';
 import '../screens/home/goals_screen.dart';
 import '../screens/home/home_screen.dart';
@@ -51,6 +52,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/onboarding/expenses',
         builder: (context, state) => const OnboardingExpensesScreen(),
       ),
+      GoRoute(path: '/chat', builder: (context, state) => const ChatScreen()),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) =>
             AppShell(navigationShell: navigationShell),

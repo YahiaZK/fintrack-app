@@ -45,19 +45,6 @@ class AppShell extends StatelessWidget {
       backgroundColor: AppColors.background,
       extendBody: true,
       body: navigationShell,
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 56),
-        child: FloatingActionButton(
-          onPressed: () {},
-          backgroundColor: AppColors.primary,
-          shape: const CircleBorder(),
-          child: const Icon(
-            Icons.smart_toy_outlined,
-            color: AppColors.textPrimary,
-          ),
-        ),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
       bottomNavigationBar: Container(
         decoration: const BoxDecoration(
           color: AppColors.background,
@@ -67,44 +54,108 @@ class AppShell extends StatelessWidget {
           top: false,
           child: SizedBox(
             height: 68,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: List.generate(_items.length, (i) {
-                final item = _items[i];
-                final active = i == current;
-                final color = active
-                    ? AppColors.primary
-                    : AppColors.textPrimary;
-                return Expanded(
-                  child: InkWell(
-                    onTap: () => _onTap(i),
-                    customBorder: const StadiumBorder(),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          active ? item.activeIcon : item.icon,
-                          color: color,
-                          size: 24,
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          item.label,
-                          style: TextStyle(
-                            color: color,
-                            fontSize: 12,
-                            fontWeight: active
-                                ? FontWeight.w700
-                                : FontWeight.w500,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              }),
+            child: Stack(
+              clipBehavior: Clip.none,
+              alignment: Alignment.topCenter,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    for (var i = 0; i < 2; i++)
+                      _NavButton(
+                        item: _items[i],
+                        active: i == current,
+                        onTap: () => _onTap(i),
+                      ),
+                    const SizedBox(width: 72),
+                    for (var i = 2; i < _items.length; i++)
+                      _NavButton(
+                        item: _items[i],
+                        active: i == current,
+                        onTap: () => _onTap(i),
+                      ),
+                  ],
+                ),
+                Positioned(
+                  top: -12,
+                  child: _ChatButton(onTap: () => context.push('/chat')),
+                ),
+              ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _NavButton extends StatelessWidget {
+  const _NavButton({
+    required this.item,
+    required this.active,
+    required this.onTap,
+  });
+
+  final _NavItem item;
+  final bool active;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = active ? AppColors.primary : AppColors.textPrimary;
+
+    return Expanded(
+      child: InkWell(
+        onTap: onTap,
+        customBorder: const StadiumBorder(),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(active ? item.activeIcon : item.icon, color: color, size: 24),
+            const SizedBox(height: 6),
+            Text(
+              item.label,
+              style: TextStyle(
+                color: color,
+                fontSize: 12,
+                fontWeight: active ? FontWeight.w700 : FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ChatButton extends StatelessWidget {
+  const _ChatButton({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 64,
+        height: 64,
+        decoration: BoxDecoration(
+          color: const Color(0xFF08C789),
+          borderRadius: BorderRadius.circular(18),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.primary.withValues(alpha: 0.32),
+              blurRadius: 24,
+              offset: const Offset(0, 14),
+            ),
+          ],
+        ),
+        alignment: Alignment.center,
+        child: const Icon(
+          Icons.chat_bubble_rounded,
+          color: AppColors.background,
+          size: 34,
         ),
       ),
     );
