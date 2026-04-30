@@ -31,14 +31,15 @@ class TransactionService {
     });
   }
 
-  Future<void> create({
+  Future<String> create({
     required String name,
     required double amount,
     required TransactionType type,
     required String category,
     required DateTime date,
-  }) {
-    return _firestore.runTransaction((txn) async {
+  }) async {
+    final newDoc = _col.doc();
+    await _firestore.runTransaction((txn) async {
       final userSnap = await txn.get(_userDoc);
       final totals = _readTotals(userSnap.data());
 
@@ -47,7 +48,6 @@ class TransactionService {
           isIncome ? totals.netWorth + amount : totals.netWorth - amount;
       final newSpent = isIncome ? totals.spent : totals.spent + amount;
 
-      final newDoc = _col.doc();
       txn.set(newDoc, {
         'name': name,
         'amount': amount,
@@ -62,6 +62,7 @@ class TransactionService {
         'totalSaved': totals.saved,
       }, SetOptions(merge: true));
     });
+    return newDoc.id;
   }
 
   Future<void> delete(TransactionEntry entry) {
