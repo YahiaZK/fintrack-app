@@ -8,6 +8,20 @@ import '../../providers/goal_providers.dart';
 import '../../theme/app_colors.dart';
 import '../../utils/quest_icons.dart';
 
+// ── Goal categories ──────────────────────────────────────────────────────────
+const _goalCategories = <String>[
+  'home',
+  'travel',
+  'car',
+  'education',
+  'health',
+  'savings',
+  'shopping',
+  'entertainment',
+  'food',
+  'other',
+];
+
 class GoalsScreen extends ConsumerWidget {
   const GoalsScreen({super.key});
 
@@ -173,6 +187,23 @@ class _GoalCard extends ConsumerWidget {
     }
   }
 
+  Future<void> _confirmDelete(BuildContext context, WidgetRef ref) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (_) => _DeleteConfirmDialog(goalName: goal.name),
+    );
+    if (confirmed != true) return;
+    try {
+      await ref.read(goalServiceProvider).delete(goalId: goal.id);
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Failed to delete goal: $e')));
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final saved = goal.currentAmount.toDouble();
@@ -191,6 +222,7 @@ class _GoalCard extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // ── Top row: name + deadline + category icon ──
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -217,7 +249,7 @@ class _GoalCard extends ConsumerWidget {
                   ],
                 ),
               ),
-              const SizedBox(width: 10),
+              const SizedBox(width: 8),
               Container(
                 width: 40,
                 height: 40,
@@ -235,6 +267,7 @@ class _GoalCard extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: 14),
+          // ── Saved / total ──
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -256,6 +289,7 @@ class _GoalCard extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: 8),
+          // ── Progress bar ──
           Row(
             children: [
               Expanded(
@@ -281,35 +315,176 @@ class _GoalCard extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: 14),
-          Center(
-            child: OutlinedButton.icon(
-              onPressed: () => _openAddAmountDialog(context, ref),
-              icon: Icon(Icons.payments_outlined, color: accent, size: 18),
-              label: Text(
-                'Add Amount',
-                style: TextStyle(
-                  color: accent,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
+          // ── Add Amount + Delete buttons ──
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: () => _openAddAmountDialog(context, ref),
+                  icon: Icon(Icons.payments_outlined, color: accent, size: 18),
+                  label: Text(
+                    'Add Amount',
+                    style: TextStyle(
+                      color: accent,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(color: accent, width: 1.5),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 18,
+                      vertical: 10,
+                    ),
+                  ),
                 ),
               ),
-              style: OutlinedButton.styleFrom(
-                side: BorderSide(color: accent, width: 1.5),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 18,
-                  vertical: 10,
+              const SizedBox(width: 10),
+              SizedBox(
+                height: 42,
+                width: 42,
+                child: OutlinedButton(
+                  onPressed: () => _confirmDelete(context, ref),
+                  style: OutlinedButton.styleFrom(
+                    padding: EdgeInsets.zero,
+                    side: const BorderSide(color: AppColors.danger, width: 1.5),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  child: const Icon(
+                    Icons.delete_outline_rounded,
+                    color: AppColors.danger,
+                    size: 20,
+                  ),
                 ),
               ),
-            ),
+            ],
           ),
         ],
       ),
     );
   }
 }
+
+// ────────────────────────────────────────────────────────────────────────────
+// Delete confirmation dialog
+// ────────────────────────────────────────────────────────────────────────────
+
+class _DeleteConfirmDialog extends StatelessWidget {
+  const _DeleteConfirmDialog({required this.goalName});
+
+  final String goalName;
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      backgroundColor: AppColors.cardSurface,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      title: Column(
+        children: [
+          Container(
+            width: 52,
+            height: 52,
+            decoration: BoxDecoration(
+              color: AppColors.danger.withValues(alpha: 0.15),
+              shape: BoxShape.circle,
+            ),
+            alignment: Alignment.center,
+            child: const Icon(
+              Icons.delete_forever_rounded,
+              color: AppColors.danger,
+              size: 28,
+            ),
+          ),
+          const SizedBox(height: 12),
+          const Text(
+            'Delete Goal?',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: AppColors.textPrimary,
+              fontWeight: FontWeight.w800,
+              fontSize: 17,
+            ),
+          ),
+        ],
+      ),
+      content: RichText(
+        textAlign: TextAlign.center,
+        text: TextSpan(
+          style: const TextStyle(
+            color: AppColors.textMuted,
+            fontSize: 14,
+            height: 1.5,
+          ),
+          children: [
+            const TextSpan(text: 'Are you sure you want to delete\n'),
+            TextSpan(
+              text: '"$goalName"',
+              style: const TextStyle(
+                color: AppColors.textPrimary,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const TextSpan(text: '?\n\nThis action cannot be undone.'),
+          ],
+        ),
+      ),
+      actionsAlignment: MainAxisAlignment.center,
+      actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+      actions: [
+        Row(
+          children: [
+            Expanded(
+              child: OutlinedButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                style: OutlinedButton.styleFrom(
+                  side: const BorderSide(color: Color(0xFF2A2E3A)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                ),
+                child: const Text(
+                  'Cancel',
+                  style: TextStyle(
+                    color: AppColors.textMuted,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: ElevatedButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.danger,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                ),
+                child: const Text(
+                  'Delete',
+                  style: TextStyle(fontWeight: FontWeight.w700),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// Remaining unchanged widgets
+// ────────────────────────────────────────────────────────────────────────────
 
 class _NewGoalCta extends StatelessWidget {
   const _NewGoalCta({required this.onTap});
@@ -478,6 +653,10 @@ class _AddAmountDialogState extends State<_AddAmountDialog> {
   }
 }
 
+// ────────────────────────────────────────────────────────────────────────────
+// New goal dialog
+// ────────────────────────────────────────────────────────────────────────────
+
 class _NewGoalDialog extends StatefulWidget {
   const _NewGoalDialog();
 
@@ -488,14 +667,13 @@ class _NewGoalDialog extends StatefulWidget {
 class _NewGoalDialogState extends State<_NewGoalDialog> {
   final _formKey = GlobalKey<FormState>();
   final _nameCtrl = TextEditingController();
-  final _categoryCtrl = TextEditingController();
   final _totalCtrl = TextEditingController();
+  String _category = _goalCategories.first;
   DateTime? _deadline;
 
   @override
   void dispose() {
     _nameCtrl.dispose();
-    _categoryCtrl.dispose();
     _totalCtrl.dispose();
     super.dispose();
   }
@@ -517,7 +695,7 @@ class _NewGoalDialogState extends State<_NewGoalDialog> {
     Navigator.of(context).pop(
       _NewGoalData(
         name: _nameCtrl.text.trim(),
-        category: _categoryCtrl.text.trim(),
+        category: _category,
         totalAmount: total,
         deadline: _deadline,
       ),
@@ -543,25 +721,51 @@ class _NewGoalDialogState extends State<_NewGoalDialog> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              _buildField(
+              // Name
+              TextFormField(
                 controller: _nameCtrl,
-                label: 'Name',
+                style: const TextStyle(color: AppColors.textPrimary),
+                decoration: _decoration('Name'),
                 validator: (v) =>
                     (v == null || v.trim().isEmpty) ? 'Required' : null,
               ),
               const SizedBox(height: 12),
-              _buildField(
-                controller: _categoryCtrl,
-                label: 'Category (e.g. home, travel, car)',
-                validator: (v) =>
-                    (v == null || v.trim().isEmpty) ? 'Required' : null,
+              // Category dropdown
+              DropdownButtonFormField<String>(
+                value: _category,
+                isExpanded: true,
+                dropdownColor: AppColors.cardSurface,
+                style: const TextStyle(color: AppColors.textPrimary),
+                decoration: _decoration('Category'),
+                items: [
+                  for (final c in _goalCategories)
+                    DropdownMenuItem(
+                      value: c,
+                      child: Row(
+                        children: [
+                          Icon(
+                            iconForCategory(c),
+                            color: AppColors.primary,
+                            size: 18,
+                          ),
+                          const SizedBox(width: 10),
+                          Text(_capitalize(c)),
+                        ],
+                      ),
+                    ),
+                ],
+                onChanged: (v) {
+                  if (v != null) setState(() => _category = v);
+                },
               ),
               const SizedBox(height: 12),
-              _buildField(
+              // Total amount
+              TextFormField(
                 controller: _totalCtrl,
-                label: 'Total amount',
                 keyboardType: TextInputType.number,
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                style: const TextStyle(color: AppColors.textPrimary),
+                decoration: _decoration('Total amount'),
                 validator: (v) {
                   final n = int.tryParse((v ?? '').trim());
                   if (n == null || n <= 0) return 'Enter an amount > 0';
@@ -569,6 +773,7 @@ class _NewGoalDialogState extends State<_NewGoalDialog> {
                 },
               ),
               const SizedBox(height: 12),
+              // Deadline picker
               InkWell(
                 onTap: _pickDeadline,
                 borderRadius: BorderRadius.circular(8),
@@ -616,23 +821,6 @@ class _NewGoalDialogState extends State<_NewGoalDialog> {
           ],
         ),
       ],
-    );
-  }
-
-  Widget _buildField({
-    required TextEditingController controller,
-    required String label,
-    TextInputType? keyboardType,
-    List<TextInputFormatter>? inputFormatters,
-    String? Function(String?)? validator,
-  }) {
-    return TextFormField(
-      controller: controller,
-      keyboardType: keyboardType,
-      inputFormatters: inputFormatters,
-      validator: validator,
-      style: const TextStyle(color: AppColors.textPrimary),
-      decoration: _decoration(label),
     );
   }
 
@@ -697,4 +885,9 @@ String _formatDate(DateTime d) {
     'Dec',
   ];
   return '${d.day} ${months[d.month - 1]} ${d.year}';
+}
+
+String _capitalize(String s) {
+  if (s.isEmpty) return s;
+  return s[0].toUpperCase() + s.substring(1);
 }
