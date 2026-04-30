@@ -49,4 +49,8 @@ class GoalService {
       'currentAmount': FieldValue.increment(amount),
     });
   }
+
+  Future<void> delete({required String goalId}) {
+    return _col.doc(goalId).delete();
+  }
 }
