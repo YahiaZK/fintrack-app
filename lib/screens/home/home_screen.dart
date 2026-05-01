@@ -11,6 +11,7 @@ import '../../providers/transaction_providers.dart';
 import '../../providers/user_providers.dart';
 import '../../theme/app_colors.dart';
 import '../../utils/level.dart';
+import '../../utils/quest_completion.dart';
 import '../../utils/quest_icons.dart';
 
 class HomeScreen extends ConsumerWidget {
@@ -509,6 +510,7 @@ class _QuestsSection extends StatelessWidget {
                   title: q.name,
                   icon: iconForCategory(q.category),
                   xp: q.xp,
+                  completed: q.completed && isQuestCurrentlyComplete(q, q.completedAt),
                 ),
               ),
           ],
@@ -546,53 +548,59 @@ class _EmptyQuests extends StatelessWidget {
 }
 
 class _QuestCard extends StatelessWidget {
-  const _QuestCard({required this.title, required this.icon, required this.xp});
+  const _QuestCard({required this.title, required this.icon, required this.xp, this.completed = false});
 
   final String title;
   final IconData icon;
   final int xp;
+  final bool completed;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: AppColors.cardSurface,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, color: AppColors.level, size: 20),
-          const SizedBox(height: 14),
-          Text(
-            title,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              color: AppColors.textPrimary,
-              fontSize: 14,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          const SizedBox(height: 12),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-            decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.18),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            alignment: Alignment.center,
-            child: Text(
-              '+$xp XP',
+    return Opacity(
+      opacity: completed ? 0.5 : 1.0,
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: AppColors.cardSurface,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(icon, color: AppColors.level, size: 20),
+            const SizedBox(height: 14),
+            Text(
+              title,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               style: const TextStyle(
-                color: AppColors.primary,
-                fontSize: 13,
-                fontWeight: FontWeight.w800,
+                color: AppColors.textPrimary,
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
               ),
             ),
-          ),
-        ],
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withValues(alpha: 0.18),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              alignment: Alignment.center,
+              child: completed
+                  ? const Icon(Icons.check_rounded, color: AppColors.primary, size: 18)
+                  : Text(
+                      '+$xp XP',
+                      style: const TextStyle(
+                        color: AppColors.primary,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+            ),
+          ],
+        ),
       ),
     );
   }
