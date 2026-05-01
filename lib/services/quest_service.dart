@@ -8,10 +8,8 @@ class QuestService {
   final FirebaseFirestore _firestore;
   final String _uid;
 
-  CollectionReference<Map<String, dynamic>> get _col => _firestore
-      .collection('users')
-      .doc(_uid)
-      .collection('quests');
+  CollectionReference<Map<String, dynamic>> get _col =>
+      _firestore.collection('users').doc(_uid).collection('quests');
 
   DocumentReference<Map<String, dynamic>> get _userDoc =>
       _firestore.collection('users').doc(_uid);
@@ -87,7 +85,7 @@ const List<_DefaultQuest> _defaultQuests = [
   _DefaultQuest(
     id: 'daily_log_expenses',
     name: "Log today's expenses",
-    xp: 50,
+    xp: 750,
     category: 'bills',
     frequency: 'daily',
     order: 1,
@@ -95,7 +93,7 @@ const List<_DefaultQuest> _defaultQuests = [
   _DefaultQuest(
     id: 'daily_stay_under_budget',
     name: 'Stay under your daily budget',
-    xp: 75,
+    xp: 800,
     category: 'food',
     frequency: 'daily',
     order: 2,
@@ -103,7 +101,7 @@ const List<_DefaultQuest> _defaultQuests = [
   _DefaultQuest(
     id: 'daily_save_toward_goal',
     name: 'Save toward your goal',
-    xp: 30,
+    xp: 650,
     category: 'savings',
     frequency: 'daily',
     order: 3,
@@ -111,7 +109,7 @@ const List<_DefaultQuest> _defaultQuests = [
   _DefaultQuest(
     id: 'weekly_budget_review',
     name: 'Complete a weekly budget review',
-    xp: 200,
+    xp: 1250,
     category: 'bills',
     frequency: 'weekly',
     order: 1,
@@ -119,7 +117,7 @@ const List<_DefaultQuest> _defaultQuests = [
   _DefaultQuest(
     id: 'weekly_save_income',
     name: 'Save 10% of this week\'s income',
-    xp: 250,
+    xp: 1400,
     category: 'savings',
     frequency: 'weekly',
     order: 2,
