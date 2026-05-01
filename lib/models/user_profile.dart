@@ -9,6 +9,7 @@ class UserProfile {
     this.totalSaved,
     this.xp = 100,
     this.onboardingCompleted = false,
+    this.seenToolGuides = const <String>[],
   });
 
   final String? name;
@@ -20,6 +21,7 @@ class UserProfile {
   final double? totalSaved;
   final int xp;
   final bool onboardingCompleted;
+  final List<String> seenToolGuides;
 
   UserProfile copyWith({
     String? name,
@@ -31,6 +33,7 @@ class UserProfile {
     double? totalSaved,
     int? xp,
     bool? onboardingCompleted,
+    List<String>? seenToolGuides,
   }) {
     return UserProfile(
       name: name ?? this.name,
@@ -42,6 +45,7 @@ class UserProfile {
       totalSaved: totalSaved ?? this.totalSaved,
       xp: xp ?? this.xp,
       onboardingCompleted: onboardingCompleted ?? this.onboardingCompleted,
+      seenToolGuides: seenToolGuides ?? this.seenToolGuides,
     );
   }
 
@@ -56,6 +60,7 @@ class UserProfile {
       if (totalSaved != null) 'totalSaved': totalSaved,
       'xp': xp,
       'onboardingCompleted': onboardingCompleted,
+      'seenToolGuides': seenToolGuides,
     };
   }
 
@@ -70,6 +75,9 @@ class UserProfile {
       totalSaved: (data['totalSaved'] as num?)?.toDouble(),
       xp: (data['xp'] as num?)?.toInt() ?? 100,
       onboardingCompleted: (data['onboardingCompleted'] as bool?) ?? false,
+      seenToolGuides:
+          (data['seenToolGuides'] as List?)?.whereType<String>().toList() ??
+          const <String>[],
     );
   }
 }

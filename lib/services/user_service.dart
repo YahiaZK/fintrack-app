@@ -43,6 +43,13 @@ class UserService {
     }, SetOptions(merge: true));
   }
 
+  Future<void> markToolGuideSeen(String toolKey) {
+    return _doc.set({
+      'seenToolGuides': FieldValue.arrayUnion([toolKey]),
+      'updatedAt': FieldValue.serverTimestamp(),
+    }, SetOptions(merge: true));
+  }
+
   Future<UserProfile?> read() async {
     final snap = await _doc.get();
     final data = snap.data();

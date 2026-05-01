@@ -7,14 +7,73 @@ import '../../models/transaction_entry.dart';
 import '../../providers/transaction_providers.dart';
 import '../../providers/user_providers.dart';
 import '../../theme/app_colors.dart';
+import '../../widgets/tool_guide_overlay.dart';
 
-class InsightsScreen extends ConsumerWidget {
+const String _insightsGuideKey = 'insights';
+
+class InsightsScreen extends ConsumerStatefulWidget {
   const InsightsScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<InsightsScreen> createState() => _InsightsScreenState();
+}
+
+class _InsightsScreenState extends ConsumerState<InsightsScreen> {
+  bool _guideHandled = false;
+
+  void _maybeShowGuide() {
+    if (_guideHandled) return;
+    final profile = ref.read(userProfileStreamProvider).value;
+    if (profile == null) return;
+    if (profile.seenToolGuides.contains(_insightsGuideKey)) {
+      _guideHandled = true;
+      return;
+    }
+    _guideHandled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
+      await showToolGuideOverlay(
+        context,
+        title: 'Welcome to Insights',
+        subtitle:
+            'A wider look at your money — see where it goes and how it moves over time.',
+        accentIcon: Icons.bar_chart_rounded,
+        steps: const [
+          ToolGuideStep(
+            icon: Icons.account_balance_wallet_outlined,
+            title: 'Watch your headline numbers',
+            body:
+                'The top tiles show your current Net Worth, lifetime Total Spent, and how many transactions you have logged. Glance here first.',
+          ),
+          ToolGuideStep(
+            icon: Icons.compare_arrows_rounded,
+            title: 'Compare worth vs spending',
+            body:
+                'The Net Worth vs Total Spent bar gives you a quick read on whether you are building wealth faster than you are burning it.',
+          ),
+          ToolGuideStep(
+            icon: Icons.donut_large_rounded,
+            title: 'Find your biggest leaks',
+            body:
+                'The Spending by Category donut breaks down where your money goes. Top slices = biggest opportunities to trim.',
+          ),
+          ToolGuideStep(
+            icon: Icons.lightbulb_outline,
+            title: 'Make it a habit',
+            body:
+                'Log every transaction in the Transaction Manager — the more data you feed in, the sharper these charts get.',
+          ),
+        ],
+      );
+      ref.read(userServiceProvider)?.markToolGuideSeen(_insightsGuideKey);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final txAsync = ref.watch(transactionsStreamProvider);
     final profile = ref.watch(userProfileStreamProvider).value;
+    _maybeShowGuide();
     final netWorth = profile?.totalNetWorth ?? 0;
     final totalSpent = profile?.totalSpent ?? 0;
 

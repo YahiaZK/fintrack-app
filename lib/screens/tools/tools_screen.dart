@@ -29,7 +29,7 @@ class ToolsScreen extends ConsumerWidget {
                     title: 'Transaction Manager',
                     description:
                         'Track income & expenses to keep your budget accurate.',
-                    lessonLine: 'Every dirham counts when tracked.',
+                    lessonLine: 'Every dollar counts when tracked.',
                     tag: 'Basic',
                     icon: Icons.account_balance_wallet,
                     locked: userLevel < 1,
