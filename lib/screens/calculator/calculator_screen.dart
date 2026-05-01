@@ -47,7 +47,7 @@ class _CalcResult {
   final double rentDays;
   final double healthcareDays;
   final double leisurePercent;
-  final String riskLevel;   // 'low' | 'medium' | 'high'
+  final String riskLevel; // 'low' | 'medium' | 'high'
   final String riskLabel;
   final String riskMessage;
   final List<_SacrificeOption> sacrifices;
@@ -92,22 +92,26 @@ _CalcResult _calculate(double price) {
   if (leisurePct <= 20) {
     riskLevel = 'low';
     riskLabel = 'Smart spend!';
-    riskMessage = 'This is only ${leisurePct.toStringAsFixed(0)}% of your monthly leisure budget. Looks manageable!';
+    riskMessage =
+        'This is only ${leisurePct.toStringAsFixed(0)}% of your monthly leisure budget. Looks manageable!';
     xpReward = 100;
   } else if (leisurePct <= 50) {
     riskLevel = 'medium';
     riskLabel = 'Think twice!';
-    riskMessage = 'This would consume ${leisurePct.toStringAsFixed(0)}% of your leisure budget for this month.';
+    riskMessage =
+        'This would consume ${leisurePct.toStringAsFixed(0)}% of your leisure budget for this month.';
     xpReward = 300;
   } else if (leisurePct <= 80) {
     riskLevel = 'high';
     riskLabel = 'Risky decision!';
-    riskMessage = 'This may use up to ${leisurePct.toStringAsFixed(0)}% of your leisure budget for this month.';
+    riskMessage =
+        'This may use up to ${leisurePct.toStringAsFixed(0)}% of your leisure budget for this month.';
     xpReward = 600;
   } else {
     riskLevel = 'high';
     riskLabel = 'Danger zone!';
-    riskMessage = 'This exceeds your entire monthly leisure budget (${leisurePct.toStringAsFixed(0)}%). Reconsider!';
+    riskMessage =
+        'This exceeds your entire monthly leisure budget (${leisurePct.toStringAsFixed(0)}%). Reconsider!';
     xpReward = 800;
   }
 
@@ -222,8 +226,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                     onPriceChanged: _onPriceChanged,
                   ),
                   if (result != null) ..._buildResults(result),
-                  if (result == null)
-                    _buildEmptyState(),
+                  if (result == null) _buildEmptyState(),
                 ],
               ),
             ),
@@ -243,7 +246,11 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
           Text(
             'Enter a price to see\nyour reality check',
             textAlign: TextAlign.center,
-            style: TextStyle(color: AppColors.textMuted, fontSize: 14, height: 1.5),
+            style: TextStyle(
+              color: AppColors.textMuted,
+              fontSize: 14,
+              height: 1.5,
+            ),
           ),
         ],
       ),
@@ -267,7 +274,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             child: _EquivalenceCard(
               label: 'Food',
               value: _formatDays(result.foodDays),
-              subtitle: '\${_UsAverages.dailyFood.toStringAsFixed(0)}/day avg',
               icon: Icons.restaurant,
             ),
           ),
@@ -276,7 +282,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             child: _EquivalenceCard(
               label: 'Transport',
               value: _formatDays(result.transportDays),
-              subtitle: '\${_UsAverages.dailyTransport.toStringAsFixed(0)}/day avg',
               icon: Icons.directions_car_filled,
             ),
           ),
@@ -290,7 +295,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             child: _EquivalenceCard(
               label: 'Electricity',
               value: _formatDays(result.electricityDays),
-              subtitle: '\${_UsAverages.dailyElectricity.toStringAsFixed(1)}/day avg',
               icon: Icons.bolt,
             ),
           ),
@@ -299,7 +303,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             child: _EquivalenceCard(
               label: 'Internet',
               value: _formatDays(result.internetDays),
-              subtitle: '\${_UsAverages.dailyInternet.toStringAsFixed(1)}/day avg',
               icon: Icons.wifi,
             ),
           ),
@@ -313,7 +316,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             child: _EquivalenceCard(
               label: 'Rent',
               value: _formatDays(result.rentDays),
-              subtitle: '\${_UsAverages.dailyRent.toStringAsFixed(0)}/day avg',
               icon: Icons.home_outlined,
             ),
           ),
@@ -322,7 +324,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             child: _EquivalenceCard(
               label: 'Healthcare',
               value: _formatDays(result.healthcareDays),
-              subtitle: '\${_UsAverages.dailyHealthcare.toStringAsFixed(0)}/day avg',
               icon: Icons.health_and_safety_outlined,
             ),
           ),
@@ -348,10 +349,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
               onPressed: () {},
               style: OutlinedButton.styleFrom(
                 minimumSize: const Size.fromHeight(52),
-                side: const BorderSide(
-                  color: AppColors.level,
-                  width: 1.5,
-                ),
+                side: const BorderSide(color: AppColors.level, width: 1.5),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -595,13 +593,11 @@ class _EquivalenceCard extends StatelessWidget {
     required this.label,
     required this.value,
     required this.icon,
-    this.subtitle,
   });
 
   final String label;
   final String value;
   final IconData icon;
-  final String? subtitle;
 
   @override
   Widget build(BuildContext context) {
@@ -645,17 +641,6 @@ class _EquivalenceCard extends StatelessWidget {
               fontWeight: FontWeight.w900,
             ),
           ),
-          if (subtitle != null)
-            Padding(
-              padding: const EdgeInsets.only(top: 2),
-              child: Text(
-                subtitle!,
-                style: const TextStyle(
-                  color: AppColors.textMuted,
-                  fontSize: 10,
-                ),
-              ),
-            ),
         ],
       ),
     );
@@ -696,17 +681,23 @@ class _DecisionCard extends StatelessWidget {
 
   Color get _borderColor {
     switch (result.riskLevel) {
-      case 'low': return AppColors.primary;
-      case 'medium': return AppColors.warning;
-      default: return AppColors.danger;
+      case 'low':
+        return AppColors.primary;
+      case 'medium':
+        return AppColors.warning;
+      default:
+        return AppColors.danger;
     }
   }
 
   IconData get _icon {
     switch (result.riskLevel) {
-      case 'low': return Icons.check_circle_outline;
-      case 'medium': return Icons.info_outline;
-      default: return Icons.warning_amber_rounded;
+      case 'low':
+        return Icons.check_circle_outline;
+      case 'medium':
+        return Icons.info_outline;
+      default:
+        return Icons.warning_amber_rounded;
     }
   }
 

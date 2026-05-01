@@ -33,7 +33,7 @@ class OnboardingController extends Notifier<UserProfile> {
     return service.save(
       state.copyWith(
         onboardingCompleted: true,
-        totalNetWorth: income,
+        totalNetWorth: income - expenses,
         totalSpent: expenses,
         totalSaved: 0,
       ),
@@ -43,5 +43,5 @@ class OnboardingController extends Notifier<UserProfile> {
 
 final onboardingControllerProvider =
     NotifierProvider<OnboardingController, UserProfile>(
-  OnboardingController.new,
-);
+      OnboardingController.new,
+    );
