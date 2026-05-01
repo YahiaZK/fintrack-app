@@ -38,12 +38,14 @@ class ToolsScreen extends ConsumerWidget {
                   const SizedBox(height: 28),
                   _ToolCard(
                     levelLabel: 'Level 5',
-                    title: '',
-                    description: 'Unlocks at level 5',
-                    lessonLine: '',
-                    tag: '',
-                    icon: Icons.lock,
+                    title: 'Insights',
+                    description:
+                        'See where your money goes with charts of income, spending, and trends.',
+                    lessonLine: 'What gets measured gets managed.',
+                    tag: 'Analytics',
+                    icon: Icons.bar_chart_rounded,
                     locked: userLevel < 5,
+                    onTap: () => context.push('/tools/insights'),
                   ),
                   const SizedBox(height: 28),
                   _ToolCard(

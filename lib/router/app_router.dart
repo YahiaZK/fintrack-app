@@ -19,6 +19,7 @@ import '../screens/profile/profile_screen.dart';
 import '../screens/profile/ranks_screen.dart';
 import '../screens/quests/quests_screen.dart';
 import '../screens/settings/settings_screen.dart';
+import '../screens/tools/insights_screen.dart';
 import '../screens/tools/tools_screen.dart';
 import '../screens/tools/transaction_manager_screen.dart';
 
@@ -108,6 +109,10 @@ final routerProvider = Provider<GoRouter>((ref) {
                     path: 'transaction-manager',
                     builder: (context, state) =>
                         const TransactionManagerScreen(),
+                  ),
+                  GoRoute(
+                    path: 'insights',
+                    builder: (context, state) => const InsightsScreen(),
                   ),
                 ],
               ),
