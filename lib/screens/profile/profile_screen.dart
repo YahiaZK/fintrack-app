@@ -3,8 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../providers/auth_providers.dart';
+import '../../providers/quest_providers.dart';
 import '../../providers/user_providers.dart';
 import '../../theme/app_colors.dart';
+import '../../utils/level.dart';
+import '../../utils/ranks.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -13,6 +16,8 @@ class ProfileScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final profileAsync = ref.watch(userProfileStreamProvider);
     final user = ref.watch(authStateChangesProvider).value;
+    final quests = ref.watch(questsStreamProvider).value ?? const [];
+    final completionsCount = quests.where((q) => q.completed).length;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -37,6 +42,11 @@ class ProfileScreen extends ConsumerWidget {
             final income = profile?.monthlyIncome ?? 0;
             final expenses = profile?.monthlyExpenses ?? 0;
             final netSavings = income - expenses;
+            final xp = profile?.xp ?? 100;
+            final level = levelFromXp(xp).clamp(1, kRanks.length);
+            final atCap = levelFromXp(xp) > kRanks.length;
+            final progress = atCap ? 1.0 : progressInLevel(xp);
+            final rankName = rankForLevel(level).name;
             return CustomScrollView(
               slivers: [
                 SliverToBoxAdapter(
@@ -50,34 +60,34 @@ class ProfileScreen extends ConsumerWidget {
                     children: [
                       _ProfileHeaderCard(
                         name: name,
-                        title: 'Gold II',
-                        level: 8,
-                        progress: 0.75,
+                        title: rankName,
+                        level: level,
+                        progress: progress,
                         onTap: () => context.push('/home/profile/ranks'),
                       ),
                       const SizedBox(height: 14),
                       Row(
-                        children: const [
+                        children: [
                           Expanded(
                             child: _StatCard(
                               label: 'Tasks Completed',
-                              value: '158',
+                              value: '$completionsCount',
                               valueColor: AppColors.textPrimary,
                             ),
                           ),
-                          SizedBox(width: 10),
-                          Expanded(
+                          const SizedBox(width: 10),
+                          const Expanded(
                             child: _StatCard(
                               label: 'Longest Streak',
                               value: '24 days',
                               valueColor: AppColors.warning,
                             ),
                           ),
-                          SizedBox(width: 10),
+                          const SizedBox(width: 10),
                           Expanded(
                             child: _StatCard(
                               label: 'Total XP',
-                              value: '12,450',
+                              value: _formatXp(xp),
                               valueColor: AppColors.textPrimary,
                             ),
                           ),
@@ -738,6 +748,13 @@ class _ShareProfileButton extends StatelessWidget {
       ),
     );
   }
+}
+
+String _formatXp(int n) {
+  return n.toString().replaceAllMapped(
+    RegExp(r'(\d)(?=(\d{3})+(?!\d))'),
+    (m) => '${m[1]},',
+  );
 }
 
 String _formatMoney(double v) {

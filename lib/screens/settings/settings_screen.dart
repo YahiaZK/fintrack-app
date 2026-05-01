@@ -24,6 +24,56 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   bool _levelUp = true;
   bool _budgetExceeded = true;
 
+  Future<void> _confirmResetXp() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.cardSurface,
+        title: const Text(
+          'Reset XP?',
+          style: TextStyle(color: AppColors.textPrimary),
+        ),
+        content: const Text(
+          'This will set your XP back to 0 and reset your level. This cannot be undone.',
+          style: TextStyle(color: AppColors.textMuted),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(color: AppColors.textPrimary),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text(
+              'Reset',
+              style: TextStyle(color: AppColors.danger),
+            ),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    final service = ref.read(userServiceProvider);
+    if (service == null) return;
+    try {
+      await service.resetXp();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('XP reset to 0')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to reset XP: $e')),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final profileAsync = ref.watch(userProfileStreamProvider);
@@ -89,6 +139,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           icon: Icons.tag_rounded,
                           label: 'Number Format',
                           trailing: _numberFormat,
+                        ),
+                        const _CardDivider(),
+                        _PreferenceRow(
+                          icon: Icons.restart_alt_rounded,
+                          label: 'Reset XP',
+                          trailing: '',
+                          labelColor: AppColors.danger,
+                          onTap: _confirmResetXp,
                         ),
                       ],
                     ),
@@ -367,38 +425,43 @@ class _PreferenceRow extends StatelessWidget {
     required this.icon,
     required this.label,
     required this.trailing,
+    this.labelColor,
+    this.onTap,
   });
 
   final IconData icon;
   final String label;
   final String trailing;
+  final Color? labelColor;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
+    final content = Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       child: Row(
         children: [
-          Icon(icon, color: AppColors.textMuted, size: 20),
+          Icon(icon, color: labelColor ?? AppColors.textMuted, size: 20),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
               label,
-              style: const TextStyle(
-                color: AppColors.textPrimary,
+              style: TextStyle(
+                color: labelColor ?? AppColors.textPrimary,
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
               ),
             ),
           ),
-          Text(
-            trailing,
-            style: const TextStyle(
-              color: AppColors.textMuted,
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
+          if (trailing.isNotEmpty)
+            Text(
+              trailing,
+              style: const TextStyle(
+                color: AppColors.textMuted,
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
             ),
-          ),
           const SizedBox(width: 4),
           const Icon(
             Icons.chevron_right_rounded,
@@ -407,6 +470,11 @@ class _PreferenceRow extends StatelessWidget {
           ),
         ],
       ),
+    );
+    if (onTap == null) return content;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(onTap: onTap, child: content),
     );
   }
 }

@@ -22,6 +22,7 @@ class UserService {
     return _doc.set({
       'email': email,
       'onboardingCompleted': false,
+      'xp': 100,
       'createdAt': FieldValue.serverTimestamp(),
       'updatedAt': FieldValue.serverTimestamp(),
     }, SetOptions(merge: true));
@@ -33,6 +34,13 @@ class UserService {
       if (data == null) return null;
       return UserProfile.fromMap(data);
     });
+  }
+
+  Future<void> resetXp() {
+    return _doc.set({
+      'xp': 0,
+      'updatedAt': FieldValue.serverTimestamp(),
+    }, SetOptions(merge: true));
   }
 
   Future<UserProfile?> read() async {

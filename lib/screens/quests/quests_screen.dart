@@ -3,8 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../models/quest.dart';
 import '../../providers/quest_providers.dart';
+import '../../providers/user_providers.dart';
 import '../../theme/app_colors.dart';
+import '../../utils/level.dart';
+import '../../utils/quest_completion.dart';
 import '../../utils/quest_icons.dart';
+import '../../widgets/level_up_overlay.dart';
 
 class QuestsScreen extends ConsumerWidget {
   const QuestsScreen({super.key});
@@ -47,7 +51,7 @@ class QuestsScreen extends ConsumerWidget {
                         accent: AppColors.warning,
                       ),
                       const SizedBox(height: 12),
-                      ..._buildList(daily),
+                      ..._buildList(context, ref, daily),
                       const SizedBox(height: 28),
                       const _SectionHeader(
                         title: 'Weekly Quests',
@@ -55,7 +59,7 @@ class QuestsScreen extends ConsumerWidget {
                         accent: AppColors.textPrimary,
                       ),
                       const SizedBox(height: 12),
-                      ..._buildList(weekly),
+                      ..._buildList(context, ref, weekly),
                       const SizedBox(height: 28),
                       const _SectionHeader(
                         title: 'Habit Quests',
@@ -63,7 +67,7 @@ class QuestsScreen extends ConsumerWidget {
                         accent: AppColors.danger,
                       ),
                       const SizedBox(height: 12),
-                      ..._buildList(habit),
+                      ..._buildList(context, ref, habit),
                     ],
                   ),
                 ),
@@ -81,24 +85,62 @@ class QuestsScreen extends ConsumerWidget {
         .toList();
   }
 
-  List<Widget> _buildList(List<Quest> quests) {
+  List<Widget> _buildList(
+    BuildContext context,
+    WidgetRef ref,
+    List<Quest> quests,
+  ) {
     if (quests.isEmpty) {
       return const [_EmptyCategory()];
     }
     final widgets = <Widget>[];
     for (var i = 0; i < quests.length; i++) {
       if (i > 0) widgets.add(const SizedBox(height: 12));
-      widgets.add(_QuestCard(quest: quests[i]));
+      final q = quests[i];
+      final completed =
+          q.completed && isQuestCurrentlyComplete(q, q.completedAt);
+      widgets.add(
+        _QuestCard(
+          quest: q,
+          completed: completed,
+          onTap: completed ? null : () => _onComplete(context, ref, q),
+        ),
+      );
     }
     return widgets;
   }
+
+  Future<void> _onComplete(
+    BuildContext context,
+    WidgetRef ref,
+    Quest quest,
+  ) async {
+    final service = ref.read(questServiceProvider);
+    if (service == null) return;
+    final oldXp = ref.read(userProfileStreamProvider).value?.xp ?? 100;
+    try {
+      await service.completeQuest(quest);
+      final oldLevel = levelFromXp(oldXp);
+      final newLevel = levelFromXp(oldXp + quest.xp);
+      if (newLevel > oldLevel && context.mounted) {
+        await showLevelUpOverlay(context, newLevel);
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to complete quest: $e')),
+        );
+      }
+    }
+  }
 }
 
-class _Header extends StatelessWidget {
+class _Header extends ConsumerWidget {
   const _Header();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final xp = ref.watch(userProfileStreamProvider).value?.xp ?? 100;
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 18, 16, 18),
       decoration: const BoxDecoration(
@@ -126,12 +168,12 @@ class _Header extends StatelessWidget {
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
-              children: const [
-                Icon(Icons.bolt, color: AppColors.primary, size: 14),
-                SizedBox(width: 4),
+              children: [
+                const Icon(Icons.bolt, color: AppColors.primary, size: 14),
+                const SizedBox(width: 4),
                 Text(
-                  '1,250 XP today',
-                  style: TextStyle(
+                  '${_formatXp(xp)} XP',
+                  style: const TextStyle(
                     color: AppColors.primary,
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
@@ -194,18 +236,20 @@ class _SectionHeader extends StatelessWidget {
 }
 
 class _QuestCard extends StatelessWidget {
-  const _QuestCard({required this.quest});
+  const _QuestCard({
+    required this.quest,
+    required this.completed,
+    required this.onTap,
+  });
 
   final Quest quest;
+  final bool completed;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    final content = Padding(
       padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: AppColors.cardSurface,
-        borderRadius: BorderRadius.circular(16),
-      ),
       child: Row(
         children: [
           Container(
@@ -249,22 +293,49 @@ class _QuestCard extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 10),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-            decoration: BoxDecoration(
-              color: AppColors.background,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Text(
-              '+${_formatXp(quest.xp)} XP',
-              style: const TextStyle(
+          if (completed)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: AppColors.background,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(
+                Icons.check_rounded,
                 color: AppColors.primary,
-                fontSize: 13,
-                fontWeight: FontWeight.w800,
+                size: 18,
+              ),
+            )
+          else
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: AppColors.background,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                '+${_formatXp(quest.xp)} XP',
+                style: const TextStyle(
+                  color: AppColors.primary,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w800,
+                ),
               ),
             ),
-          ),
         ],
+      ),
+    );
+
+    return Opacity(
+      opacity: completed ? 0.5 : 1.0,
+      child: Material(
+        color: AppColors.cardSurface,
+        borderRadius: BorderRadius.circular(16),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(16),
+          child: content,
+        ),
       ),
     );
   }
@@ -284,7 +355,7 @@ class _EmptyCategory extends StatelessWidget {
       ),
       alignment: Alignment.center,
       child: const Text(
-        'No Quests for this Category',
+        'No Quests for now',
         style: TextStyle(
           color: AppColors.textMuted,
           fontSize: 14,

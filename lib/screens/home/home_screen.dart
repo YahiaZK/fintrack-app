@@ -10,6 +10,7 @@ import '../../providers/quest_providers.dart';
 import '../../providers/transaction_providers.dart';
 import '../../providers/user_providers.dart';
 import '../../theme/app_colors.dart';
+import '../../utils/level.dart';
 import '../../utils/quest_icons.dart';
 
 class HomeScreen extends ConsumerWidget {
@@ -46,7 +47,13 @@ class HomeScreen extends ConsumerWidget {
               profile?.totalNetWorth ?? monthlyIncome;
           final spent =
               profile?.totalSpent ?? monthlyExpenses;
-          final saved = profile?.totalSaved ?? 0;
+          final goalsList = goalsAsync.value ?? const [];
+          final saved = goalsList
+              .fold<int>(0, (s, g) => s + g.currentAmount)
+              .toDouble();
+          final xp = profile?.xp ?? 100;
+          final level = levelFromXp(xp);
+          final levelProgress = progressInLevel(xp);
           return SafeArea(
             bottom: false,
             child: CustomScrollView(
@@ -58,6 +65,9 @@ class HomeScreen extends ConsumerWidget {
                     children: [
                       _ProfileCard(
                         name: name,
+                        xp: xp,
+                        level: level,
+                        progress: levelProgress,
                         onTap: () => context.go('/home/profile'),
                       ),
                       const SizedBox(height: 14),
@@ -164,9 +174,18 @@ class _Header extends StatelessWidget {
 }
 
 class _ProfileCard extends StatelessWidget {
-  const _ProfileCard({required this.name, required this.onTap});
+  const _ProfileCard({
+    required this.name,
+    required this.xp,
+    required this.level,
+    required this.progress,
+    required this.onTap,
+  });
 
   final String name;
+  final int xp;
+  final int level;
+  final double progress;
   final VoidCallback onTap;
 
   @override
@@ -186,7 +205,7 @@ class _ProfileCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              _LevelHex(level: 3),
+              _LevelHex(level: level),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
@@ -201,9 +220,23 @@ class _ProfileCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 4),
-                    const Text(
-                      'Financial Warrior Level',
-                      style: TextStyle(color: AppColors.primary, fontSize: 12),
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.bolt,
+                          color: AppColors.primary,
+                          size: 14,
+                        ),
+                        const SizedBox(width: 2),
+                        Text(
+                          '${_formatXp(xp)} XP',
+                          style: const TextStyle(
+                            color: AppColors.primary,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -235,7 +268,7 @@ class _ProfileCard extends StatelessWidget {
               children: [
                 Container(height: 4, color: AppColors.background),
                 FractionallySizedBox(
-                  widthFactor: 0.55,
+                  widthFactor: progress.clamp(0.0, 1.0),
                   child: Container(height: 4, color: AppColors.primary),
                 ),
               ],
@@ -834,6 +867,13 @@ String _relativeTime(DateTime when) {
     'Dec',
   ];
   return '${months[when.month - 1]} ${when.day}';
+}
+
+String _formatXp(int n) {
+  return n.toString().replaceAllMapped(
+    RegExp(r'(\d)(?=(\d{3})+(?!\d))'),
+    (m) => '${m[1]},',
+  );
 }
 
 String _format(double v) {

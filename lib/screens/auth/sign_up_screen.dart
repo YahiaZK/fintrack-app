@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 
 import '../../providers/auth_providers.dart';
 import '../../providers/user_providers.dart';
+import '../../services/quest_service.dart';
+import '../../services/user_service.dart';
 import '../../theme/app_colors.dart';
 import 'auth_form.dart';
 
@@ -31,9 +33,9 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
           );
       final uid = cred.user?.uid;
       if (uid != null) {
-        await ref
-            .read(userServiceProvider)
-            ?.createInitial(email: email.trim());
+        final firestore = ref.read(firestoreProvider);
+        await UserService(firestore, uid).createInitial(email: email.trim());
+        await QuestService(firestore, uid).seedDefaultsIfEmpty();
       }
     } on FirebaseAuthException catch (e) {
       if (mounted) setState(() => _error = _friendly(e));

@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../providers/user_providers.dart';
 import '../../theme/app_colors.dart';
+import '../../utils/level.dart';
 
-class ToolsScreen extends StatelessWidget {
+class ToolsScreen extends ConsumerWidget {
   const ToolsScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final xp = ref.watch(userProfileStreamProvider).value?.xp ?? 100;
+    final userLevel = levelFromXp(xp);
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -27,38 +32,38 @@ class ToolsScreen extends StatelessWidget {
                     lessonLine: 'Every dirham counts when tracked.',
                     tag: 'Basic',
                     icon: Icons.account_balance_wallet,
-                    locked: false,
+                    locked: userLevel < 1,
                     onTap: () => context.push('/tools/transaction-manager'),
                   ),
                   const SizedBox(height: 28),
-                  const _ToolCard(
+                  _ToolCard(
                     levelLabel: 'Level 5',
                     title: '',
-                    description: 'Unlocks at level 11',
+                    description: 'Unlocks at level 5',
                     lessonLine: '',
                     tag: '',
                     icon: Icons.lock,
-                    locked: true,
+                    locked: userLevel < 5,
                   ),
                   const SizedBox(height: 28),
-                  const _ToolCard(
+                  _ToolCard(
                     levelLabel: 'Level 10',
                     title: '',
-                    description: 'Unlocks at level 15',
+                    description: 'Unlocks at level 10',
                     lessonLine: '',
                     tag: '',
                     icon: Icons.lock,
-                    locked: true,
+                    locked: userLevel < 10,
                   ),
                   const SizedBox(height: 28),
-                  const _ToolCard(
+                  _ToolCard(
                     levelLabel: 'Level 20',
                     title: '',
                     description: 'Unlocks at level 20',
                     lessonLine: '',
                     tag: '',
                     icon: Icons.lock,
-                    locked: true,
+                    locked: userLevel < 20,
                   ),
                 ],
               ),
@@ -70,11 +75,12 @@ class ToolsScreen extends StatelessWidget {
   }
 }
 
-class _Header extends StatelessWidget {
+class _Header extends ConsumerWidget {
   const _Header();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final xp = ref.watch(userProfileStreamProvider).value?.xp ?? 100;
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 18, 16, 18),
       decoration: const BoxDecoration(
@@ -104,12 +110,12 @@ class _Header extends StatelessWidget {
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
-              children: const [
-                Icon(Icons.bolt, color: AppColors.primary, size: 14),
-                SizedBox(width: 4),
+              children: [
+                const Icon(Icons.bolt, color: AppColors.primary, size: 14),
+                const SizedBox(width: 4),
                 Text(
-                  '1,250 XP today',
-                  style: TextStyle(
+                  '${_formatXp(xp)} XP',
+                  style: const TextStyle(
                     color: AppColors.primary,
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
@@ -122,6 +128,13 @@ class _Header extends StatelessWidget {
       ),
     );
   }
+}
+
+String _formatXp(int n) {
+  return n.toString().replaceAllMapped(
+    RegExp(r'(\d)(?=(\d{3})+(?!\d))'),
+    (m) => '${m[1]},',
+  );
 }
 
 class _ToolCard extends StatelessWidget {

@@ -1,165 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../providers/user_providers.dart';
 import '../../theme/app_colors.dart';
-
-// ---------------------------------------------------------------------------
-// Data model
-// ---------------------------------------------------------------------------
-
-class _RankData {
-  const _RankData({
-    required this.name,
-    required this.level,
-    required this.icon,
-    required this.color,
-    required this.xpRequired,
-  });
-
-  final String name;
-  final int level;
-  final IconData icon;
-  final Color color;
-  final int xpRequired;
-}
+import '../../utils/level.dart';
+import '../../utils/ranks.dart';
 
 enum _RankState { locked, current, completed }
 
-// ---------------------------------------------------------------------------
-// Ranks Screen
-// ---------------------------------------------------------------------------
-
-class RanksScreen extends StatelessWidget {
+class RanksScreen extends ConsumerWidget {
   const RanksScreen({super.key});
 
-  static const _currentRank = _RankData(
-    name: 'Gold II',
-    level: 8,
-    icon: Icons.shield_rounded,
-    color: Color(0xFFEF9F27),
-    xpRequired: 3000,
-  );
-
-  static const _currentXp = 2450;
-
-  static const _rankSteps = <_RankData>[
-    _RankData(
-      name: 'Crown',
-      level: 16,
-      icon: Icons.workspace_premium_rounded,
-      color: Color(0xFFE7C860),
-      xpRequired: 15000,
-    ),
-    _RankData(
-      name: 'Diamond III',
-      level: 15,
-      icon: Icons.diamond_rounded,
-      color: Color(0xFF78D6F5),
-      xpRequired: 13500,
-    ),
-    _RankData(
-      name: 'Diamond II',
-      level: 14,
-      icon: Icons.diamond_rounded,
-      color: Color(0xFF78D6F5),
-      xpRequired: 12000,
-    ),
-    _RankData(
-      name: 'Diamond I',
-      level: 13,
-      icon: Icons.diamond_rounded,
-      color: Color(0xFF78D6F5),
-      xpRequired: 10500,
-    ),
-    _RankData(
-      name: 'Platinum III',
-      level: 12,
-      icon: Icons.military_tech_rounded,
-      color: Color(0xFFB8D0DC),
-      xpRequired: 9000,
-    ),
-    _RankData(
-      name: 'Platinum II',
-      level: 11,
-      icon: Icons.military_tech_rounded,
-      color: Color(0xFFB8D0DC),
-      xpRequired: 7800,
-    ),
-    _RankData(
-      name: 'Platinum I',
-      level: 10,
-      icon: Icons.military_tech_rounded,
-      color: Color(0xFFB8D0DC),
-      xpRequired: 6600,
-    ),
-    _RankData(
-      name: 'Gold III',
-      level: 9,
-      icon: Icons.shield_rounded,
-      color: Color(0xFFEF9F27),
-      xpRequired: 4200,
-    ),
-    _RankData(
-      name: 'Gold II',
-      level: 8,
-      icon: Icons.shield_rounded,
-      color: Color(0xFFEF9F27),
-      xpRequired: 3000,
-    ),
-    _RankData(
-      name: 'Gold I',
-      level: 7,
-      icon: Icons.shield_rounded,
-      color: Color(0xFFEF9F27),
-      xpRequired: 2200,
-    ),
-    _RankData(
-      name: 'Silver III',
-      level: 6,
-      icon: Icons.verified_rounded,
-      color: Color(0xFFC0CED7),
-      xpRequired: 1600,
-    ),
-    _RankData(
-      name: 'Silver II',
-      level: 5,
-      icon: Icons.verified_rounded,
-      color: Color(0xFFC0CED7),
-      xpRequired: 1100,
-    ),
-    _RankData(
-      name: 'Silver I',
-      level: 4,
-      icon: Icons.verified_rounded,
-      color: Color(0xFFC0CED7),
-      xpRequired: 700,
-    ),
-    _RankData(
-      name: 'Bronze III',
-      level: 3,
-      icon: Icons.savings_rounded,
-      color: Color(0xFFB77B4B),
-      xpRequired: 450,
-    ),
-    _RankData(
-      name: 'Bronze II',
-      level: 2,
-      icon: Icons.savings_rounded,
-      color: Color(0xFFB77B4B),
-      xpRequired: 250,
-    ),
-    _RankData(
-      name: 'Bronze I',
-      level: 1,
-      icon: Icons.savings_rounded,
-      color: Color(0xFFB77B4B),
-      xpRequired: 100,
-    ),
-  ];
-
   @override
-  Widget build(BuildContext context) {
-    final progress = _currentXp / _currentRank.xpRequired;
+  Widget build(BuildContext context, WidgetRef ref) {
+    final xp = ref.watch(userProfileStreamProvider).value?.xp ?? 100;
+    final level = levelFromXp(xp).clamp(1, kRanks.length);
+    final currentRank = rankForLevel(level);
+    final atCap = levelFromXp(xp) > kRanks.length;
+    final progress = atCap ? 1.0 : progressInLevel(xp);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -189,14 +48,12 @@ class RanksScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 14),
                   _CurrentRankCard(
-                    rank: _currentRank,
-                    xp: _currentXp,
+                    rank: currentRank,
+                    xp: xp,
                     progress: progress,
                   ),
                   const SizedBox(height: 14),
-                  const _XpSourcesCard(),
-                  const SizedBox(height: 14),
-                  _RankPathCard(ranks: _rankSteps, current: _currentRank),
+                  _RankPathCard(ranks: kRanks, current: currentRank),
                 ],
               ),
             ),
@@ -260,7 +117,7 @@ class _CurrentRankCard extends StatelessWidget {
     required this.progress,
   });
 
-  final _RankData rank;
+  final RankData rank;
   final int xp;
   final double progress;
 
@@ -344,100 +201,14 @@ class _CurrentRankCard extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
-// XP Sources Card
-// ---------------------------------------------------------------------------
-
-class _XpSourcesCard extends StatelessWidget {
-  const _XpSourcesCard();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.cardSurface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFF2B303D)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: const [
-          Text(
-            'Where did XP come from today?',
-            textAlign: TextAlign.left,
-            style: TextStyle(
-              color: AppColors.textPrimary,
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          SizedBox(height: 18),
-          _XpSourceRow(
-            icon: Icons.savings_outlined,
-            label: 'Daily saving',
-            xp: '+150 XP',
-          ),
-          SizedBox(height: 14),
-          _XpSourceRow(
-            icon: Icons.analytics_outlined,
-            label: 'Budget analysis',
-            xp: '+50 XP',
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _XpSourceRow extends StatelessWidget {
-  const _XpSourceRow({
-    required this.icon,
-    required this.label,
-    required this.xp,
-  });
-
-  final IconData icon;
-  final String label;
-  final String xp;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Icon(icon, color: AppColors.primary, size: 20),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Text(
-            label,
-            style: const TextStyle(
-              color: AppColors.textPrimary,
-              fontSize: 15,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
-        Text(
-          xp,
-          style: const TextStyle(
-            color: AppColors.primary,
-            fontSize: 15,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
 // Rank Path Card
 // ---------------------------------------------------------------------------
 
 class _RankPathCard extends StatelessWidget {
   const _RankPathCard({required this.ranks, required this.current});
 
-  final List<_RankData> ranks;
-  final _RankData current;
+  final List<RankData> ranks;
+  final RankData current;
 
   @override
   Widget build(BuildContext context) {
@@ -469,7 +240,7 @@ class _RankPathCard extends StatelessWidget {
     );
   }
 
-  _RankState _stateFor(_RankData rank) {
+  _RankState _stateFor(RankData rank) {
     if (rank.level == current.level) return _RankState.current;
     if (rank.level < current.level) return _RankState.completed;
     return _RankState.locked;
@@ -479,7 +250,7 @@ class _RankPathCard extends StatelessWidget {
 class _RankPathRow extends StatelessWidget {
   const _RankPathRow({required this.rank, required this.state});
 
-  final _RankData rank;
+  final RankData rank;
   final _RankState state;
 
   @override
@@ -510,6 +281,19 @@ class _RankPathRow extends StatelessWidget {
                       : AppColors.textPrimary,
                   fontSize: isCurrent ? 16 : 15,
                   fontWeight: isCurrent ? FontWeight.w900 : FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                'Level ${rank.level}',
+                style: TextStyle(
+                  color: isLocked
+                      ? AppColors.textPrimary.withValues(alpha: 0.2)
+                      : isCurrent
+                      ? AppColors.primary.withValues(alpha: 0.85)
+                      : AppColors.textMuted,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
               if (isCurrent) ...[
@@ -548,7 +332,7 @@ class _RankBadge extends StatelessWidget {
     this.large = false,
   });
 
-  final _RankData rank;
+  final RankData rank;
   final _RankState state;
   final bool large;
 

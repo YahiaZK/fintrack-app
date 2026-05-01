@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../models/goal.dart';
 import '../../providers/goal_providers.dart';
+import '../../services/goal_service.dart';
 import '../../theme/app_colors.dart';
 import '../../utils/quest_icons.dart';
 
@@ -101,16 +102,15 @@ class GoalsScreen extends ConsumerWidget {
       builder: (_) => const _NewGoalDialog(),
     );
     if (result == null) return;
+    final service = ref.read(goalServiceProvider);
+    if (service == null) return;
     try {
-      await ref
-          .read(goalServiceProvider)
-          .create(
-            name: result.name,
-            category: result.category,
-            totalAmount: result.totalAmount,
-            currentAmount: 0,
-            deadline: result.deadline,
-          );
+      await service.create(
+        name: result.name,
+        category: result.category,
+        totalAmount: result.totalAmount,
+        deadline: result.deadline,
+      );
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(
@@ -174,10 +174,20 @@ class _GoalCard extends ConsumerWidget {
       builder: (_) => _AddAmountDialog(accent: accent, goalName: goal.name),
     );
     if (amount == null) return;
+    final service = ref.read(goalServiceProvider);
+    if (service == null) return;
     try {
-      await ref
-          .read(goalServiceProvider)
-          .addAmount(goalId: goal.id, amount: amount);
+      await service.addAmount(goalId: goal.id, amount: amount);
+    } on InsufficientNetWorthException catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Insufficient net worth. You only have \$${e.available.toStringAsFixed(0)}.',
+            ),
+          ),
+        );
+      }
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(
@@ -193,8 +203,10 @@ class _GoalCard extends ConsumerWidget {
       builder: (_) => _DeleteConfirmDialog(goalName: goal.name),
     );
     if (confirmed != true) return;
+    final service = ref.read(goalServiceProvider);
+    if (service == null) return;
     try {
-      await ref.read(goalServiceProvider).delete(goalId: goal.id);
+      await service.delete(goalId: goal.id);
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(
